@@ -58,6 +58,10 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
     }
     
     
+    /**
+     * Contstruct a viewing inventory 
+     * @return
+     */
     public Inventory constructViewing(){
         
         
@@ -78,19 +82,21 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
       
     }
     
+    /**
+     * Does this stockroom contain this item
+     * @param locate Item to look for
+     * @param checkAmount
+     * @return
+     */
     public boolean hasStock(ItemStack locate,boolean checkAmount){
         Material material = locate.getType();
-        short damage = locate.getDurability();
         int amount = locate.getAmount();
         
         int amountFound = 0;
         if(stock.contains(material)){
             for( Entry<Integer, ? extends ItemStack> e : stock.all(material).entrySet()){
                 ItemStack i  = e.getValue();
-                if(
-                        i.getType() == material &&
-                        i.getDurability() == damage
-                        ){
+                if(i.equals(locate)){
                     amountFound += i.getAmount();
                 }
                 
