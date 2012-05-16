@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>me.tehbeard</groupId>
+	<artifactId>CitiTrader</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>CitiTrader</name>
+	<description>Trader for citizens</description>
+
+
+	<repositories>
+		<repository>
+			<id>bukkit-repo</id>
+			<url>http://repo.bukkit.org/content/groups/public/</url>
+		</repository>
+
+		<repository>
+			<id>everything</id>
+			<url>http://repo.citizensnpcs.net</url>
+		</repository>
+		<repository>
+			<id>Vault</id>
+			<url>http://ci.milkbowl.net/plugin/repository/everything/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.bukkit</groupId>
+			<artifactId>bukkit</artifactId>
+			<version>1.2.5-R1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>net.citizensnpcs</groupId>
+			<artifactId>citizensapi</artifactId>
+			<version>2.0-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.milkbowl.vault</groupId>
+			<artifactId>Vault</artifactId>
+			<version>1.2.17-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+</project>

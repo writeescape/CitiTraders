@@ -1,0 +1,9 @@
+name: CitiTrader
+main:  me.tehbeard.cititrader.CitiTrader
+version: 1.0
+depend: [Citizens]
+commands:
+    quest:
+        description: Admin a trader
+        usage: /<command>
+        
