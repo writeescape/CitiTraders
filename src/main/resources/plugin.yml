@@ -1,4 +1,4 @@
 name: CitiTrader
 main:  me.tehbeard.cititrader.CitiTrader
 version: 1.0
-depend: [Citizens]
+depend: [Citizens,Vault]

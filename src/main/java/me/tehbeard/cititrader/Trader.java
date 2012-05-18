@@ -84,6 +84,8 @@ public class Trader extends Character implements Listener{
                     }
                     else
                     {
+                        //check econ
+                        //CitiTrader.economy.bankHas(arg0, arg1)
                         store.getInventory().removeItem(is);
                         player.addItem(is);
                     }

@@ -37,6 +37,12 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
             stock.setItem(
             Integer.parseInt(slotKey.name()), ItemStorage.loadItemStack(slotKey));
         }
+        
+        
+        for (DataKey slotKey : data.getRelative("prices").getIntegerSubKeys()){
+            stock.setItem(
+            Integer.parseInt(slotKey.name()), ItemStorage.loadItemStack(slotKey));
+        }
     }
 
     @Override
