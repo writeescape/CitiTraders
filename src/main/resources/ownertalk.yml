@@ -1,0 +1,19 @@
+#Owner menu Script
+id: "start" 
+type: "menu"
+  options:
+    '0':
+      name: "Use the stockroom"
+      prompt: 
+        type: "OpenStockRoom"
+        next: "start"
+      '1':
+        name: "Set Prices"
+        prompt: 
+          type: "OpenStockRoom"
+          next:
+            type: "SetItemPrice"
+            next: "start"
+      '2:
+        name: "Exit"
+        prompt: "NULL"

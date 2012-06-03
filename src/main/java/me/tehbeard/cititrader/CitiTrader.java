@@ -24,8 +24,8 @@ public class CitiTrader extends JavaPlugin {
     public void onEnable() {
         self = this;
         CitizensPlugin citizens = (CitizensPlugin) Bukkit.getPluginManager().getPlugin("Citizens");
-        citizens.getTraitManager().registerTrait(new TraitFactory(StockRoomTrait.class).withName("stockroom").withPlugin(this));
         citizens.getCharacterManager().registerCharacter(new CharacterFactory(Trader.class).withName("trader"));
+        citizens.getTraitManager().registerTrait(new TraitFactory(StockRoomTrait.class).withName("stockroom").withPlugin(this));
         
         
         Bukkit.getPluginManager().registerEvents((Listener) citizens.getCharacterManager().getCharacter("trader"), this);

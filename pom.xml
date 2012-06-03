@@ -48,5 +48,38 @@
 			<version>1.0</version>
 		</dependency>
 	</dependencies>
+	<build>
 
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<artifactSet>
+								<includes>
+									<include>me.tehbeard:Vocalise</include>
+								</includes>
+
+							</artifactSet>
+							<relocations>
+								<relocation>
+									<pattern>me.tehbeard.vocalise</pattern>
+									<shadedPattern>me.tehbeard.cititrader.vocalise</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+
+	</build>
 </project>

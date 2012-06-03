@@ -1,5 +1,6 @@
 package me.tehbeard.cititrader;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,11 +14,12 @@ import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.ItemStorage;
+import net.citizensnpcs.api.util.YamlStorage.YamlKey;
 
 public class StockRoomTrait extends Trait implements InventoryHolder {
 
     private Inventory stock;
-    Map<ItemStack,Integer> prices;
+    Map<ItemStack,Double> prices;
     
     public StockRoomTrait(){
         this(54);
@@ -27,6 +29,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
         if(size <= 0 || size > 54){throw new IllegalArgumentException("Size must be between 1 and 54");}
 
         stock = Bukkit.createInventory(this,size,"stockroom");
+        prices = new HashMap<ItemStack, Double>();
     }
 
     @Override
@@ -39,9 +42,10 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
         }
         
         
-        for (DataKey slotKey : data.getRelative("prices").getIntegerSubKeys()){
-            stock.setItem(
-            Integer.parseInt(slotKey.name()), ItemStorage.loadItemStack(slotKey));
+        for (DataKey priceKey : data.getRelative("prices").getIntegerSubKeys()){
+            ItemStack k = ItemStorage.loadItemStack(priceKey.getRelative("item"));
+            double price = priceKey.getDouble("price",0);
+            prices.put(k, price);
         }
     }
 
@@ -53,10 +57,17 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
         for(ItemStack is : stock.getContents()){
             if(is !=null){
                 
-            ItemStorage.saveItem(data.getRelative("inv." + i++),is);
+                DataKey inv = data.getRelative("inv");
+            ItemStorage.saveItem(inv.getRelative("" + i++),is);
             }
         }
 
+        DataKey priceIndex = data.getRelative("prices");
+        i = 0;
+        for(Entry<ItemStack,Double> price : prices.entrySet()){
+            ItemStorage.saveItem(priceIndex.getRelative("" + i).getRelative("item"), price.getKey());
+            priceIndex.getRelative("" + i).setDouble("price", price.getValue());
+        }
     }
 
     public Inventory getInventory() {
@@ -111,5 +122,19 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
             return checkAmount ? amount <= amountFound : amountFound > 0;
         }
         return false;
+    }
+
+    public double getPrice(ItemStack is){
+        ItemStack i = is.clone();
+        i.setAmount(1);
+        return prices.containsKey(i) ? prices.get(i) : 0;
+        
+    }
+    
+    public void setPrice(ItemStack is,double price){
+        ItemStack i = is.clone();
+        i.setAmount(1);
+        prices.put(i, price);
+        
     }
 }
