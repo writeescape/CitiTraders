@@ -11,7 +11,17 @@ CitiTraders is currently in BETA, DO NOT USE ON PRODUCTION SYSTEMS.
 !!!WARNING!!!!!!WARNING!!!
 
 CitiTraders provides a trading character type for Citizens 2.
+This character uses vault to sell items in it's stockroom to other players.
 
+Features:
+- Simple, ingame UI
+- Support for all items (inc. Enchanted items)
+- (Future: Will support Village trader screen)
+Installation
+============
+YOU MUST HAVE CITIZENS 2 INSTALLED
+YOU MUST HAVE VAULT AND AN ECONOMY PLUGIN INSTALLED
+Drop CitiTraders into the plugins folder.
 
 Creation
 ========

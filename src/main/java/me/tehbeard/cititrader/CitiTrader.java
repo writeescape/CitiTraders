@@ -26,6 +26,7 @@ public class CitiTrader extends JavaPlugin {
     public static Economy economy;
     @Override
     public void onEnable() {
+        if(setupEconomy()){
         self = this;
         CitizensPlugin citizens = (CitizensPlugin) Bukkit.getPluginManager().getPlugin("Citizens");
         citizens.getTraitManager().registerTrait(new TraitFactory(StockRoomTrait.class).withName("stockroom").withPlugin(this));
@@ -35,9 +36,11 @@ public class CitiTrader extends JavaPlugin {
         
         Bukkit.getPluginManager().registerEvents((Listener) citizens.getCharacterManager().getCharacter("trader"), this);
         
+        }else{
+            
         
-        if(!setupEconomy()){
-            getLogger().severe("VAULT NOT FOUND, TRADERS WILL NOT WORK");
+        
+            getLogger().severe("VAULT NOT FOUND, TRADERS DISABLED");
         }
         
         getLogger().info("v" + getDescription().getVersion() + " loaded");
