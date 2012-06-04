@@ -17,6 +17,7 @@ Features:
 - Simple, ingame UI
 - Support for all items (inc. Enchanted items)
 - (Future: Will support Village trader screen)
+
 Installation
 ============
 YOU MUST HAVE CITIZENS 2 INSTALLED
