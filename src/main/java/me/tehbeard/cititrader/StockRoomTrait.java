@@ -19,7 +19,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
 
     private Inventory stock;
     Map<ItemStack,Double> prices;
-    
+
     public StockRoomTrait(){
         this(54);
     }
@@ -37,52 +37,57 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
         //Load the inventory
         for (DataKey slotKey : data.getRelative("inv").getIntegerSubKeys()){
             stock.setItem(
-            Integer.parseInt(slotKey.name()), ItemStorage.loadItemStack(slotKey));
+                    Integer.parseInt(slotKey.name()), ItemStorage.loadItemStack(slotKey));
         }
-        
-        
+
+
         for (DataKey priceKey : data.getRelative("prices").getIntegerSubKeys()){
+            System.out.println("price listing found");
             ItemStack k = ItemStorage.loadItemStack(priceKey.getRelative("item"));
-            double price = priceKey.getDouble("price",0);
+            System.out.println(k);
+            double price = priceKey.getDouble("price");
+            System.out.println(price);
             prices.put(k, price);
         }
     }
 
     @Override
     public void save(DataKey data) {
-        
+
         //save the inventory
         int i = 0;
         for(ItemStack is : stock.getContents()){
             if(is !=null){
-                
+
                 DataKey inv = data.getRelative("inv");
-            ItemStorage.saveItem(inv.getRelative("" + i++),is);
+                ItemStorage.saveItem(inv.getRelative("" + i++),is);
             }
         }
 
         DataKey priceIndex = data.getRelative("prices");
         i = 0;
         for(Entry<ItemStack,Double> price : prices.entrySet()){
-            ItemStorage.saveItem(priceIndex.getRelative("" + i).getRelative("item"), price.getKey());
-            priceIndex.getRelative("" + i).setDouble("price", price.getValue());
+            if(price.getValue() > 0.0D){
+                ItemStorage.saveItem(priceIndex.getRelative("" + i).getRelative("item"), price.getKey());
+                priceIndex.getRelative("" + i).setDouble("price", price.getValue());
+            }
         }
     }
 
     public Inventory getInventory() {
         return stock;
     }
-    
-    
+
+
     /**
      * Contstruct a viewing inventory 
      * @return
      */
     public Inventory constructViewing(){
-        
-        
+
+
         Inventory display = Bukkit.createInventory(null, 54,"Store");
-        
+
         for(ItemStack is : stock){
             if(is == null){continue;}
             ItemStack chk = new ItemStack(is.getType(),1,is.getDurability());
@@ -90,14 +95,14 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
             if(display.contains(chk) == false && getPrice(is) > 0.0D){
                 display.addItem(chk);
             }
-            
+
         }
-        
+
         return display;
-        
-      
+
+
     }
-    
+
     /**
      * Does this stockroom contain this item
      * @param locate Item to look for
@@ -105,35 +110,34 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
      * @return
      */
     public boolean hasStock(ItemStack locate,boolean checkAmount){
+
+        ItemStack is = locate.clone();
         Material material = locate.getType();
         int amount = locate.getAmount();
-        
+
         int amountFound = 0;
-        if(stock.contains(material)){
-            for( Entry<Integer, ? extends ItemStack> e : stock.all(material).entrySet()){
-                ItemStack i  = e.getValue();
-                if(i.equals(locate)){
-                    amountFound += i.getAmount();
-                }
-                
+
+        for( Entry<Integer, ? extends ItemStack>  e : stock.all(material).entrySet()){
+            is.setAmount(e.getValue().getAmount());
+            if(e.getValue().equals(is)){
+                amountFound += e.getValue().getAmount();
             }
-            
-            return checkAmount ? amount <= amountFound : amountFound > 0;
         }
-        return false;
+        return checkAmount ? amount <= amountFound : amountFound > 0;
     }
+
 
     public double getPrice(ItemStack is){
         ItemStack i = is.clone();
         i.setAmount(1);
         return prices.containsKey(i) ? prices.get(i) : 0;
-        
+
     }
-    
+
     public void setPrice(ItemStack is,double price){
         ItemStack i = is.clone();
         i.setAmount(1);
         prices.put(i, price);
-        
+
     }
 }

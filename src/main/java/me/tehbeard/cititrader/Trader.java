@@ -63,6 +63,7 @@ public class Trader extends Character implements Listener{
         if(by.getName().equalsIgnoreCase(owner) && state.getStatus() == Status.SET_PRICE){
             state.getTrader().getTrait(StockRoomTrait.class).setPrice(by.getItemInHand(),state.getPrice());
             state.setStatus(Status.NOT);
+            by.sendMessage("Price set");
             return;
         }
 
@@ -88,7 +89,8 @@ public class Trader extends Character implements Listener{
     @Override
     public void onSet(NPC npc) {
         if(!npc.hasTrait(StockRoomTrait.class)){
-            npc.addTrait(new StockRoomTrait());
+            npc.addTrait(StockRoomTrait.class);
+            
         }
     }
 
@@ -128,6 +130,9 @@ public class Trader extends Character implements Listener{
                 case AMOUNT_SELECT:{
                     if(event.isShiftClick()){
                         System.out.println("AMOUNT SELECTED");
+                        Player player = (Player) event.getWhoClicked();
+                        trade(player,state.getTrader(),event.getCurrentItem());
+                        
                     }
                     else
                     {
@@ -179,8 +184,7 @@ public class Trader extends Character implements Listener{
                     if(CitiTrader.economy.withdrawPlayer(playerName, cost).type == ResponseType.SUCCESS){
                         if(CitiTrader.economy.depositPlayer(storeOwner,cost).type==ResponseType.SUCCESS){
                             store.getInventory().removeItem(is);
-                            playerInv.addItem(is);
-                            player.sendMessage("Thank you.");
+                            playerInv.addItem(is);                           
                         }
                         else
                         {
@@ -194,6 +198,10 @@ public class Trader extends Character implements Listener{
                     {
                         player.sendMessage(ChatColor.RED + "Could not transfer funds");
                     }
+                }
+                else
+                {
+                    player.sendMessage(ChatColor.RED + "You do not have enough money!");
                 }
 
 
