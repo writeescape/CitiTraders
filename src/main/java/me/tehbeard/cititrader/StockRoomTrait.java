@@ -14,7 +14,6 @@ import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.ItemStorage;
-import net.citizensnpcs.api.util.YamlStorage.YamlKey;
 
 public class StockRoomTrait extends Trait implements InventoryHolder {
 
@@ -88,7 +87,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
             if(is == null){continue;}
             ItemStack chk = new ItemStack(is.getType(),1,is.getDurability());
             chk.addEnchantments(is.getEnchantments());
-            if(display.contains(chk) == false){
+            if(display.contains(chk) == false && getPrice(is) > 0.0D){
                 display.addItem(chk);
             }
             

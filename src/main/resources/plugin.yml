@@ -2,3 +2,8 @@ name: CitiTrader
 main:  me.tehbeard.cititrader.CitiTrader
 version: 1.0
 depend: [Citizens,Vault]
+commands:
+    trader:
+        description: CitiTrader commands 
+        usage: |
+          /<command> setprice price - Set price for item currently in hand, right click npc to set price for them.

@@ -1,6 +1,0 @@
-#Vocalise File Format, Version 1.0
-id: "start" 
-type: "GetAmount"
-next: 
-  type: "ConfirmPurchase"
-  next: "NULL"
