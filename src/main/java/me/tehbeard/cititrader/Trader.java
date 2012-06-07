@@ -101,6 +101,11 @@ public class Trader extends Character implements Listener{
             event.setCancelled(true);
             if( event.getRawSlot() < event.getView().getTopInventory().getSize() && event.getRawSlot() != InventoryView.OUTSIDE){
                 TraderStatus state = getStatus(event.getWhoClicked().getName());
+                
+                
+                if(event.getCurrentItem().getType() == Material.AIR){return;}
+                
+                
                 switch(state.getStatus()){
                 case ITEM_SELECT:{
                     if(event.isShiftClick()){
