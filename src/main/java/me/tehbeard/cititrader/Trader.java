@@ -35,6 +35,7 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
  */
 public class Trader extends Character implements Listener{
 
+    
 
     private static Map<String,TraderStatus> status;
     
@@ -97,6 +98,11 @@ public class Trader extends Character implements Listener{
     public void onSet(NPC npc) {
         if(!npc.hasTrait(StockRoomTrait.class)){
             npc.addTrait(StockRoomTrait.class);
+            
+        }
+        
+        if(!npc.hasTrait(WalletTrait.class)){
+            npc.addTrait(WalletTrait.class);
             
         }
     }
