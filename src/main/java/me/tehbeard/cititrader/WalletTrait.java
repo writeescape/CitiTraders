@@ -7,9 +7,19 @@ import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
+/**
+ * Wallet for traders
+ * Wallets can be of four types
+ * - PRIVATE :: Amount held inside Wallet structure
+ * - OWNER   :: Use Owner's wallet
+ * - BANK    :: Use a bank account owner owns. (Owner of NPC must be owner of account)
+ * - ADMIN   :: Infinite wallet
+ * @author James
+ *
+ */
 public class WalletTrait extends Trait {
 
-    WalletType type;
+    WalletType type = WalletType.PRIVATE;
     double amount = 0;
     String account = "";
 
@@ -31,7 +41,8 @@ public class WalletTrait extends Trait {
     public enum WalletType{
         PRIVATE,
         OWNER,
-        BANKACCOUNT
+        BANK,
+        ADMIN
     }
 
 
@@ -43,18 +54,14 @@ public class WalletTrait extends Trait {
     public boolean deposit(double amount,NPC npc){
         if(amount <= 0 ){return false;}
         switch(type){
-        case PRIVATE:this.amount+=amount;break;
-        case OWNER: {
-            //TODO: CHECKS
-            CitiTrader.economy.depositPlayer(npc.getTrait(Owner.class).getOwner(), amount);
-        }break;
-        case BANKACCOUNT:{
-            //TODO: CHECKS
-            CitiTrader.economy.bankDeposit(account, amount);
-        }break;
+        case PRIVATE: this.amount+=amount;return true;
+        case   OWNER: return CitiTrader.economy.depositPlayer(npc.getTrait(Owner.class).getOwner(), amount).transactionSuccess();
+        case    BANK: return CitiTrader.economy.isBankOwner(account, npc.getTrait(Owner.class).getOwner()).transactionSuccess() ? CitiTrader.economy.bankDeposit(account, amount).transactionSuccess() : false;
+        case   ADMIN: return true;
+        
         }
-
-        return true;
+        
+        return false;
     }
 
     /**
@@ -63,19 +70,15 @@ public class WalletTrait extends Trait {
      * @return
      */
     public boolean withdraw(double amount,NPC npc){
-        if(amount <= 0 ){return false;}
+        if(amount <= 0 || amount > this.amount){return false;}
+        
         switch(type){
-        case PRIVATE:this.amount+=amount;break;
-        case OWNER: {
-            //TODO: CHECKS
-            CitiTrader.economy.withdrawPlayer(npc.getTrait(Owner.class).getOwner(), amount);
-        }break;
-        case BANKACCOUNT:{
-            //TODO: CHECKS
-            CitiTrader.economy.bankWithdraw(account, amount);
-        }break;
+        case PRIVATE: this.amount+=amount;return true;
+        case   OWNER: return CitiTrader.economy.withdrawPlayer(npc.getTrait(Owner.class).getOwner(), amount).transactionSuccess();
+        case    BANK: return CitiTrader.economy.isBankOwner(account, npc.getTrait(Owner.class).getOwner()).transactionSuccess() ? CitiTrader.economy.bankWithdraw(account, amount).transactionSuccess() : false;
+        case   ADMIN: return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -87,11 +90,28 @@ public class WalletTrait extends Trait {
     public boolean has(double amount,NPC npc){
         if(amount <= 0 ){return false;}
         switch(type){
-        case     PRIVATE: return this.amount >= amount;
-        case       OWNER: return CitiTrader.economy.has(npc.getTrait(Owner.class).getOwner(), amount);
-        case BANKACCOUNT: return CitiTrader.economy.bankHas(account, amount).type == ResponseType.SUCCESS;
+        case PRIVATE: return this.amount >= amount;
+        case   OWNER: return CitiTrader.economy.has(npc.getTrait(Owner.class).getOwner(), amount);
+        case    BANK: return CitiTrader.economy.isBankOwner(account, npc.getTrait(Owner.class).getOwner()).transactionSuccess() ? CitiTrader.economy.bankHas(account, amount).transactionSuccess() : false;
+        case   ADMIN: return true;
         }
         return false;
+    }
+
+    public final WalletType getType() {
+        return type;
+    }
+
+    public final void setType(WalletType type) {
+        this.type = type;
+    }
+
+    public final String getAccount() {
+        return account;
+    }
+
+    public final void setAccount(String account) {
+        this.account = account;
     }
 
 }

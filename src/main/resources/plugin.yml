@@ -8,3 +8,31 @@ commands:
         usage: |
           /<command> create name -type [TYPE] - Create a trader at the players current location
           /<command> setprice price - Set price for item currently in hand, right click npc to set price for them.
+        
+permissions:
+  traders.*:
+    description: Gives access to all trader functionality, ALSO OVERRIDES OWNER PROTECTION
+    default: op
+    children:
+      traders.commands.*: true
+  traders.command.*:
+    description: Grants access to all trader commands
+    default: op
+    children:
+      traders.command.create: true
+      traders.command.setprice: true
+      traders.command.buyorder: true
+      traders.command.fire: true
+  traders.command.create:
+    description: Can create traders using /trader create
+    default: op
+  traders.command.setprice:
+    description: can set sale prices of traders
+    default: op
+  traders.command.buyorder:
+    description: Can set purchase orders
+    default: op
+  traders.command.fire:
+    description: Can fire (remove) a trader NPC they own
+    default: op
+  

@@ -35,15 +35,18 @@ public class CitiTrader extends JavaPlugin {
     private static CitizensPlugin citizens;
     @Override
     public void onEnable() {
-        getConfig().options().copyDefaults(true);
-        saveConfig();
+        if(!getConfig().contains("profiles")){
+            getConfig().options().copyDefaults(true);
+            saveConfig();
+        }
+
         if(setupEconomy()){
             self = this;
             citizens = (CitizensPlugin) Bukkit.getPluginManager().getPlugin("Citizens");
             citizens.getTraitManager().registerTrait(new TraitFactory(StockRoomTrait.class).withName("stockroom").withPlugin(this));
             citizens.getTraitManager().registerTrait(new TraitFactory(WalletTrait.class).withName("wallet").withPlugin(this));
             citizens.getCharacterManager().registerCharacter(new CharacterFactory(Trader.class).withName("trader"));
-            
+
 
 
 
@@ -77,9 +80,9 @@ public class CitiTrader extends JavaPlugin {
         if(sender instanceof Player == false){sender.sendMessage("DOES NOT WORK FROM CONSOLE");return true;}
 
         Player player = (Player)sender;
+        if(!sender.hasPermission(PERM_PREFIX + ".command." + args[0])){return false;}
         switch(Subcommand.valueOf(args[0])){
         case create:{
-
             ArgumentPack argPack = new ArgumentPack(new String[0], new String[] {"type","style"},compact(args,1));
             EntityType npcType = EntityType.PLAYER;
             if(argPack.getOption("type")!=null && isValidNPCType(player,argPack.getOption("type").toUpperCase())){
@@ -180,7 +183,7 @@ public class CitiTrader extends JavaPlugin {
             }
 
         }
-        
+
         return limit;
     }
 }
