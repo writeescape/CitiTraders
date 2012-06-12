@@ -25,6 +25,14 @@ import net.citizensnpcs.api.npc.character.Character;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
+
+
+/**
+ * TODO: Add Wallets
+ * TODO: Add Buying capability
+ * @author James
+ *
+ */
 public class Trader extends Character implements Listener{
 
 
@@ -53,7 +61,6 @@ public class Trader extends Character implements Listener{
 
     @Override
     public void onRightClick(NPC npc, Player by) {
-        // TODO Auto-generated method stub
 
         
         TraderStatus state = getStatus(by.getName());

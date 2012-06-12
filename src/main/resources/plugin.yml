@@ -1,9 +1,10 @@
 name: CitiTrader
 main:  me.tehbeard.cititrader.CitiTrader
-version: 1.0
+version: 0.1-Beta-2
 depend: [Citizens,Vault]
 commands:
     trader:
         description: CitiTrader commands 
         usage: |
+          /<command> create name -type [TYPE] - Create a trader at the players current location
           /<command> setprice price - Set price for item currently in hand, right click npc to set price for them.

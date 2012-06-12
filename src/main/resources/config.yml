@@ -1,0 +1,20 @@
+trader-types:
+- CREEPER
+- PLAYER
+- SKELETON
+- ZOMBIE
+- PIG_ZOMBIE
+- ENDERMAN
+- BLAZE
+- WOLF
+- IRON_GOLEM
+- VILLAGER
+profiles:
+  default:
+    trader-limit: 1
+  shopkeep:
+    trader-limit: 5
+  businessman:
+    trader-limit: 10
+  ceo:
+    trader-limit: 20
