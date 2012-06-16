@@ -18,10 +18,6 @@
 			<id>everything</id>
 			<url>http://repo.citizensnpcs.net</url>
 		</repository>
-		<repository>
-			<id>Vault</id>
-			<url>http://ci.milkbowl.net/plugin/repository/everything/</url>
-		</repository>
 	</repositories>
 
 	<dependencies>
