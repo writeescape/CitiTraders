@@ -11,7 +11,8 @@ public class TraderStatus {
         ITEM_SELECT,
         AMOUNT_SELECT,
         STOCKROOM,
-        SET_PRICE
+        SET_PRICE,
+        SELL_BOX
         
     }
     private NPC trader;

@@ -145,7 +145,8 @@ public class CitiTrader extends JavaPlugin {
 
     private enum Subcommand{
         setprice,
-        create
+        create,
+        setwallet,
 
     }
 

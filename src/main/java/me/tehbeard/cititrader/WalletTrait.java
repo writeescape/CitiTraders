@@ -22,7 +22,12 @@ public class WalletTrait extends Trait {
     WalletType type = WalletType.PRIVATE;
     double amount = 0;
     String account = "";
+    NPC npc;
 
+    
+    public WalletTrait(NPC npc){
+        this.npc = npc;
+    }
 
     @Override
     public void load(DataKey key) throws NPCLoadException {
@@ -51,7 +56,7 @@ public class WalletTrait extends Trait {
      * @param amount
      * @return
      */
-    public boolean deposit(double amount,NPC npc){
+    public boolean deposit(double amount){
         if(amount <= 0 ){return false;}
         switch(type){
         case PRIVATE: this.amount+=amount;return true;
@@ -69,7 +74,7 @@ public class WalletTrait extends Trait {
      * @param amount
      * @return
      */
-    public boolean withdraw(double amount,NPC npc){
+    public boolean withdraw(double amount){
         if(amount <= 0 || amount > this.amount){return false;}
         
         switch(type){
@@ -84,10 +89,9 @@ public class WalletTrait extends Trait {
     /**
      * Do they have this much money
      * @param amount
-     * @param npc
      * @return
      */
-    public boolean has(double amount,NPC npc){
+    public boolean has(double amount){
         if(amount <= 0 ){return false;}
         switch(type){
         case PRIVATE: return this.amount >= amount;

@@ -28,24 +28,23 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 
 /**
- * TODO: Add Wallets
  * TODO: Add Buying capability
  * @author James
  *
  */
 public class Trader extends Character implements Listener{
 
-    
+
 
     private static Map<String,TraderStatus> status;
-    
+
     public static TraderStatus getStatus(String player){
         if(!status.containsKey(player)){status.put(player,new TraderStatus());}
         return status.get(player);
 
     }
 
-  
+
     public Trader(){
         status = new HashMap<String, TraderStatus>();
     }
@@ -59,11 +58,26 @@ public class Trader extends Character implements Listener{
     public void save(DataKey key) {
 
     }
+    
+    @Override
+    public void onLeftClick(NPC npc, Player by) {
+    
+        TraderStatus state = getStatus(by.getName());
+        state.setTrader(npc);
+        String owner = npc.getTrait(Owner.class).getOwner();
+
+        if(by.getName().equalsIgnoreCase(owner) && state.getStatus() == Status.NOT){
+            
+            return;
+        }
+    
+    }
+    
 
     @Override
     public void onRightClick(NPC npc, Player by) {
 
-        
+
         TraderStatus state = getStatus(by.getName());
         state.setTrader(npc);
         String owner = npc.getTrait(Owner.class).getOwner();
@@ -89,7 +103,7 @@ public class Trader extends Character implements Listener{
             state.setStatus(Status.ITEM_SELECT);
             state.setInventory(state.getTrader().getTrait(StockRoomTrait.class).constructViewing());
             by.openInventory(state.getInventory());
-            
+
 
         }
     }
@@ -98,12 +112,12 @@ public class Trader extends Character implements Listener{
     public void onSet(NPC npc) {
         if(!npc.hasTrait(StockRoomTrait.class)){
             npc.addTrait(StockRoomTrait.class);
-            
+
         }
-        
+
         if(!npc.hasTrait(WalletTrait.class)){
             npc.addTrait(WalletTrait.class);
-            
+
         }
     }
 
@@ -114,11 +128,11 @@ public class Trader extends Character implements Listener{
             event.setCancelled(true);
             if( event.getRawSlot() < event.getView().getTopInventory().getSize() && event.getRawSlot() != InventoryView.OUTSIDE){
                 TraderStatus state = getStatus(event.getWhoClicked().getName());
-                
-                
+
+
                 if(event.getCurrentItem().getType() == Material.AIR){return;}
-                
-                
+
+
                 switch(state.getStatus()){
                 case ITEM_SELECT:{
                     if(event.isShiftClick()){
@@ -149,8 +163,8 @@ public class Trader extends Character implements Listener{
                     if(event.isShiftClick()){
                         System.out.println("AMOUNT SELECTED");
                         Player player = (Player) event.getWhoClicked();
-                        trade(player,state.getTrader(),event.getCurrentItem());
-                        
+                        sellToPlayer(player,state.getTrader(),event.getCurrentItem());
+
                     }
                     else
                     {
@@ -177,10 +191,10 @@ public class Trader extends Character implements Listener{
             status.remove(event.getPlayer().getName());
         }
     }
-    
-    private void trade(Player player,NPC npc,ItemStack is){
+
+    private void sellToPlayer(Player player,NPC npc,ItemStack is){
         StockRoomTrait store = npc.getTrait(StockRoomTrait.class);
-        
+
 
         if(store.hasStock(is, true)){
 
@@ -195,12 +209,14 @@ public class Trader extends Character implements Listener{
             else
             {
                 //check econ
+                WalletTrait wallet = npc.getTrait(WalletTrait.class);
                 double cost = is.getAmount() *  store.getPrice(is);
                 String playerName = player.getName();
-                String storeOwner = npc.getTrait(Owner.class).getOwner();
                 if(CitiTrader.economy.has(playerName,cost)){
                     if(CitiTrader.economy.withdrawPlayer(playerName, cost).type == ResponseType.SUCCESS){
-                        if(CitiTrader.economy.depositPlayer(storeOwner,cost).type==ResponseType.SUCCESS){
+
+                        //if(CitiTrader.economy.depositPlayer(storeOwner,cost).type==ResponseType.SUCCESS){
+                        if(wallet.deposit(cost)){
                             store.getInventory().removeItem(is);
                             playerInv.addItem(is);                           
                         }
