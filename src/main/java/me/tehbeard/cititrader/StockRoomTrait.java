@@ -174,7 +174,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
 
     }
 
-    public void setSellPrice(ItemStack is,double price){
+    public void setBuyPrice(ItemStack is,double price){
         ItemStack i = is.clone();
         i.setAmount(1);
         sellPrices.put(i, price);
