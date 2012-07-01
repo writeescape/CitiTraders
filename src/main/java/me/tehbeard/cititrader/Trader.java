@@ -66,8 +66,9 @@ public class Trader extends Character implements Listener{
         state.setTrader(npc);
         String owner = npc.getTrait(Owner.class).getOwner();
 
-        if(by.getName().equalsIgnoreCase(owner) && state.getStatus() == Status.NOT){
+        if(!by.getName().equalsIgnoreCase(owner) && state.getStatus() == Status.NOT){
             
+            state.setStatus(Status.SELL_BOX);
             return;
         }
     
@@ -83,7 +84,7 @@ public class Trader extends Character implements Listener{
         String owner = npc.getTrait(Owner.class).getOwner();
 
         if(by.getName().equalsIgnoreCase(owner) && state.getStatus() == Status.SET_PRICE){
-            state.getTrader().getTrait(StockRoomTrait.class).setPrice(by.getItemInHand(),state.getPrice());
+            state.getTrader().getTrait(StockRoomTrait.class).setSellPrice(by.getItemInHand(),state.getPrice());
             state.setStatus(Status.NOT);
             by.sendMessage("Price set");
             return;
@@ -155,7 +156,7 @@ public class Trader extends Character implements Listener{
                     else
                     {
                         Player p = (Player) event.getWhoClicked();
-                        double price = state.getTrader().getTrait(StockRoomTrait.class).getPrice(event.getCurrentItem());
+                        double price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrice(event.getCurrentItem());
                         p.sendMessage("Item costs: " + price);
                     }
                 }break;
@@ -169,7 +170,7 @@ public class Trader extends Character implements Listener{
                     else
                     {
                         Player p = (Player) event.getWhoClicked();
-                        double price = state.getTrader().getTrait(StockRoomTrait.class).getPrice(event.getCurrentItem()) * event.getCurrentItem().getAmount();
+                        double price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrice(event.getCurrentItem()) * event.getCurrentItem().getAmount();
                         p.sendMessage("Stack costs: " + price);
                     }
                 }break;
@@ -210,7 +211,7 @@ public class Trader extends Character implements Listener{
             {
                 //check econ
                 WalletTrait wallet = npc.getTrait(WalletTrait.class);
-                double cost = is.getAmount() *  store.getPrice(is);
+                double cost = is.getAmount() *  store.getSellPrice(is);
                 String playerName = player.getName();
                 if(CitiTrader.economy.has(playerName,cost)){
                     if(CitiTrader.economy.withdrawPlayer(playerName, cost).type == ResponseType.SUCCESS){
