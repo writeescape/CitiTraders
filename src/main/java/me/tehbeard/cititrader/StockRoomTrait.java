@@ -43,7 +43,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
 
 
         //load selling prices
-        for (DataKey priceKey : data.getRelative("sellprices").getIntegerSubKeys()){
+        for (DataKey priceKey : data.getRelative("prices").getIntegerSubKeys()){
             System.out.println("price listing found");
             ItemStack k = ItemStorage.loadItemStack(priceKey.getRelative("item"));
             System.out.println(k);
@@ -78,7 +78,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
             }
         }
 
-        DataKey sellPriceIndex = data.getRelative("sellprices");
+        DataKey sellPriceIndex = data.getRelative("prices");
         i = 0;
         for(Entry<ItemStack,Double> price : sellPrices.entrySet()){
             if(price.getValue() > 0.0D){
@@ -127,6 +127,17 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
 
 
     }
+    
+    public Inventory constructSellBox(){
+
+
+        Inventory display = Bukkit.createInventory(null, 36,"Selling");
+
+        return display;
+
+
+    }
+    
 
     /**
      * Does this stockroom contain this item

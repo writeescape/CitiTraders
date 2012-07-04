@@ -7,7 +7,11 @@ commands:
         description: CitiTrader commands 
         usage: |
           /<command> create name -type [TYPE] - Create a trader at the players current location
+          /<command> fire - fire an npc
+          /<command> setwallet [private|owner|bank|admin] accountname - set wallet type
+          /<command> wallet [give|take] amount  - place/remove money from a private wallet
           /<command> setprice price - Set price for item currently in hand, right click npc to set price for them.
+          
         
 permissions:
   traders.*:
@@ -35,4 +39,15 @@ permissions:
   traders.command.fire:
     description: Can fire (remove) a trader NPC they own
     default: op
-  
+  traders.wallet.private:
+    description: Allows user to set traders to use their own private wallet.
+    default: true
+  traders.wallet.owner:
+    description: Allows user to set traders to use their owner's bank wallet.
+    default: true  
+  traders.wallet.bank:
+    description: Allows user to set traders to use a bank account (ECONOMY PLUGIN MUST SUPPORT BANKS, USER MUST OWN BANK ACCOUNT).
+    default: true 
+  traders.wallet.admin:
+    description: Allows user to set traders to use a bank account (ECONOMY PLUGIN MUST SUPPORT BANKS, USER MUST OWN BANK ACCOUNT).
+    default: op

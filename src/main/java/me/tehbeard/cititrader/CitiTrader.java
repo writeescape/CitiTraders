@@ -1,6 +1,7 @@
 package me.tehbeard.cititrader;
 
 import me.tehbeard.cititrader.TraderStatus.Status;
+import me.tehbeard.cititrader.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.ArgumentPack;
 import net.citizensnpcs.api.CitizensPlugin;
 import net.citizensnpcs.api.npc.NPC;
@@ -125,7 +126,38 @@ public class CitiTrader extends JavaPlugin {
                 TraderStatus state = Trader.getStatus(((Player)sender).getName());
                 state.setStatus(Status.SET_PRICE);
                 double price = Double.parseDouble(args[1]);
-                state.setPrice(price);
+                state.setMoney(price);
+            }
+        }
+        
+        case setwallet:{
+
+            if(args.length<2){sender.sendMessage(ChatColor.RED + "Wallet Type needed!");return true;}
+            TraderStatus state = Trader.getStatus(((Player)sender).getName());
+            WalletType type = WalletType.valueOf(args[1].toUpperCase());
+            if(type==null){sender.sendMessage(ChatColor.RED + "Invalid Wallet Type!");return true;}
+            
+            if((type!= WalletType.ADMIN || type!= WalletType.PRIVATE) && args.length != 3){
+                sender.sendMessage(ChatColor.RED + "Account info error!");
+                return true;
+            }
+            else{
+                state.setAccName(args[2]);
+            }
+            state.setStatus(Status.SET_WALLET);
+            state.setWalletType(type);
+            
+            
+            
+            
+        }
+        
+        case wallet:{
+            //TODO: Give/take from wallet
+            if(args.length<3){sender.sendMessage(ChatColor.RED + "transaction type and amount needed");return true;}
+            
+            if(args[1].equalsIgnoreCase("give")){
+                
             }
         }
 
@@ -147,6 +179,7 @@ public class CitiTrader extends JavaPlugin {
         setprice,
         create,
         setwallet,
+        wallet,
 
     }
 

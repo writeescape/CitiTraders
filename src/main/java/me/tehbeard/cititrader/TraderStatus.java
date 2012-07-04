@@ -2,6 +2,7 @@ package me.tehbeard.cititrader;
 
 import org.bukkit.inventory.Inventory;
 
+import me.tehbeard.cititrader.WalletTrait.WalletType;
 import net.citizensnpcs.api.npc.NPC;
 
 public class TraderStatus {
@@ -12,14 +13,36 @@ public class TraderStatus {
         AMOUNT_SELECT,
         STOCKROOM,
         SET_PRICE,
-        SELL_BOX
+        SET_WALLET,
+        SELL_BOX,
+        
         
     }
     private NPC trader;
-    private Status status;
-    private double price;
+    private Status status = Status.NOT;
+    private double money;
     private Inventory inventory;
+    private WalletType walletType;
+    private String accName;
     
+    
+    
+    public String getAccName() {
+        return accName;
+    }
+
+    public void setAccName(String accName) {
+        this.accName = accName;
+    }
+
+    public WalletType getWalletType() {
+        return walletType;
+    }
+
+    public void setWalletType(WalletType walletType) {
+        this.walletType = walletType;
+    }
+
     public NPC getTrader() {
         return trader;
     }
@@ -36,12 +59,12 @@ public class TraderStatus {
         this.status = status;
     }
 
-    public double getPrice() {
-        return price;
+    public double getMoney() {
+        return money;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setMoney(double money) {
+        this.money = money;
     }
 
     public Inventory getInventory() {
