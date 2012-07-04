@@ -83,7 +83,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
         for(Entry<ItemStack,Double> price : sellPrices.entrySet()){
             if(price.getValue() > 0.0D){
                 ItemStorage.saveItem(sellPriceIndex.getRelative("" + i).getRelative("item"), price.getKey());
-                sellPriceIndex.getRelative("" + i).setDouble("price", price.getValue());
+                sellPriceIndex.getRelative("" + i++).setDouble("price", price.getValue());
             }
         }
         
@@ -94,7 +94,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
         for(Entry<ItemStack,Double> price : sellPrices.entrySet()){
             if(price.getValue() > 0.0D){
                 ItemStorage.saveItem(buyPriceIndex.getRelative("" + i).getRelative("item"), price.getKey());
-                buyPriceIndex.getRelative("" + i).setDouble("price", price.getValue());
+                buyPriceIndex.getRelative("" + i++).setDouble("price", price.getValue());
             }
         }
     }
