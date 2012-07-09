@@ -10,8 +10,8 @@ commands:
           /<command> fire - fire an npc
           /<command> setwallet [private|owner|bank|admin] accountname - set wallet type
           /<command> wallet [give|take] amount  - place/remove money from a private wallet
-          /<command> setprice price - Set price for item currently in hand, right click npc to set price for them.
-          
+          /<command> sellprice price - Set selling price for item currently in hand, right click npc to set price for them.
+          /<command> buyprice price - Set buying price for item currently in hand, right click npc to set price for them.
         
 permissions:
   traders.*:

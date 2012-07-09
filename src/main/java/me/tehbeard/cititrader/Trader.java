@@ -3,11 +3,14 @@ package me.tehbeard.cititrader;
 
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,6 +21,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import me.tehbeard.cititrader.TraderStatus.Status;
+import me.tehbeard.cititrader.WalletTrait.WalletType;
 
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
@@ -28,7 +32,6 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 
 /**
- * TODO: Add Buying capability
  * @author James
  *
  */
@@ -78,7 +81,6 @@ public class Trader extends Character implements Listener{
     }
 
 
-    @Override
     public void onRightClick(NPC npc, Player by) {
 
 
@@ -89,12 +91,20 @@ public class Trader extends Character implements Listener{
         if(by.getName().equalsIgnoreCase(owner)){
 
             switch(state.getStatus()){
-            case SET_PRICE:{
+            case SET_PRICE_SELL:{
                 state.getTrader().getTrait(StockRoomTrait.class).setSellPrice(by.getItemInHand(),state.getMoney());
                 state.setStatus(Status.NOT);
                 by.sendMessage("Price set");
                 return;
             }
+            
+            case SET_PRICE_BUY:{
+                state.getTrader().getTrait(StockRoomTrait.class).setBuyPrice(by.getItemInHand(),state.getMoney());
+                state.setStatus(Status.NOT);
+                by.sendMessage("Price set");
+                return;
+            }
+            
             case SET_WALLET:
             {
                 state.getTrader().getTrait(WalletTrait.class).setAccount(state.getAccName());
@@ -103,6 +113,52 @@ public class Trader extends Character implements Listener{
                 by.sendMessage("Wallet information set");
                 return;
             }
+
+            case GIVE_MONEY:{
+                if(state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE){
+                    by.sendMessage(ChatColor.RED + "Cannot use give/take on traders who use economy backed accounts.");
+                    return;
+                }
+                if(!CitiTrader.economy.has(by.getName(), state.getMoney())){
+                    by.sendMessage(ChatColor.RED + "Not enough funds.");
+                }
+                if(!state.getTrader().getTrait(WalletTrait.class).deposit(state.getMoney())){
+                    by.sendMessage(ChatColor.RED + "Cannot  give trader the money.");
+                    return;
+                }
+                if(!CitiTrader.economy.withdrawPlayer(by.getName(), state.getMoney()).transactionSuccess()){
+                    by.sendMessage(ChatColor.RED + "Cannot give trader the money from your wallet.");
+                    state.getTrader().getTrait(WalletTrait.class).withdraw(state.getMoney());
+                    return;
+                }
+                by.sendMessage(ChatColor.GREEN + "Money given");
+                status.remove(by.getName());
+                return;
+            }
+            case TAKE_MONEY:
+                
+                if(state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE){
+                    by.sendMessage(ChatColor.RED + "Cannot use give/take on traders who use economy backed accounts.");
+                    return;
+                }
+                WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
+                
+                if(!wallet.has(state.getMoney())){
+                    by.sendMessage(ChatColor.RED + "Not enough funds.");
+                    return;
+                }
+                if(!CitiTrader.economy.depositPlayer(by.getName(),state.getMoney()).transactionSuccess()){
+                    by.sendMessage(ChatColor.RED + "Cannot take the money.");
+                    return;
+                }
+                if(!wallet.withdraw(state.getMoney())){
+                    by.sendMessage(ChatColor.RED + "Cannot take the money from the trader's wallet.");
+                    CitiTrader.economy.withdrawPlayer(by.getName(), state.getMoney());
+                    return;
+                }
+                by.sendMessage(ChatColor.GREEN + "Money given");
+                status.remove(by.getName());
+                return;
             }
 
         }
@@ -112,7 +168,7 @@ public class Trader extends Character implements Listener{
             System.out.println("Owner inventory!");
             state.setStatus(Status.STOCKROOM);
             by.openInventory(state.getTrader().getTrait(StockRoomTrait.class).getInventory());
-        }else if(by.getName().equalsIgnoreCase(owner) && state.getStatus() == Status.SET_PRICE){
+        }else if(by.getName().equalsIgnoreCase(owner) && state.getStatus() == Status.SET_PRICE_SELL){
             //SET PRICE
         }
         else
@@ -239,17 +295,62 @@ public class Trader extends Character implements Listener{
         TraderStatus state = getStatus(event.getPlayer().getName());
 
         if(state.getStatus() == Status.SELL_BOX){
-            //TODO: Loop and buy items off them.
-            //foreach item
-              //check can be purchased.
-                //check has space for it
-                  //check has cash for it.
-                    //take item
-                    //give cash
-              //else
-                //drop on player location.
-            //clean up   
+            Iterator<ItemStack> it = state.getInventory().iterator();
+            while(it.hasNext()){
+                ItemStack is = it.next();
+                if(is==null){continue;}
+
+                double price = state.getTrader().getTrait(StockRoomTrait.class).getBuyPrice(is);
+
+                //check we buy it.
+                if(price == 0.0D){continue;}
+
+
+
+
+                //check space
+                Inventory chkr = Bukkit.createInventory(null, 9*4);
+                chkr.setContents(state.getTrader().getTrait(StockRoomTrait.class).getInventory().getContents());
+                if(chkr.addItem(is).size() > 0){
+                    ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader does not have enough space to hold something you sold him.");
+                    continue;
+                }
+                chkr = null;
+
+                WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
+                //check we have the cash
+                double sale = price * is.getAmount();
+                if(!wallet.has(sale)){
+                    ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader does not have the funds to pay you.");
+                    break;
+                }
+
+                //give cash
+                if(!wallet.withdraw(sale)){
+                    ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader couldn't find their wallet.");
+                    break;
+                }
+
+                if(!CitiTrader.economy.depositPlayer(event.getPlayer().getName(), sale).transactionSuccess()){
+                    ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Couldn't find your wallet.");
+                    wallet.deposit(sale);
+                    break;
+                }
+
+                //take item
+                it.remove();
+                state.getTrader().getTrait(StockRoomTrait.class).getInventory().addItem(is);
+
+
+            }
+
             //drop all items in sellbox inventory
+            it = state.getInventory().iterator();
+            while(it.hasNext()){
+                ItemStack is = it.next();
+                event.getPlayer().getWorld().dropItemNaturally(event.getPlayer().getLocation(),is);
+            }
+
         }
 
         status.remove(event.getPlayer().getName());
@@ -257,6 +358,7 @@ public class Trader extends Character implements Listener{
     }
 
     private void sellToPlayer(Player player,NPC npc,ItemStack is){
+        //TODO: If admin shop, do not deduct items.
         StockRoomTrait store = npc.getTrait(StockRoomTrait.class);
 
 

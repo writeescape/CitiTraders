@@ -12,9 +12,12 @@ public class TraderStatus {
         ITEM_SELECT,
         AMOUNT_SELECT,
         STOCKROOM,
-        SET_PRICE,
+        SET_PRICE_SELL,
+        SET_PRICE_BUY,
         SET_WALLET,
         SELL_BOX,
+        GIVE_MONEY,
+        TAKE_MONEY
         
         
     }

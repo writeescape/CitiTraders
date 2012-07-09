@@ -121,22 +121,33 @@ public class CitiTrader extends JavaPlugin {
             return true;
 
         }
-        case setprice:{
+        case sellprice:{
             if(args.length == 2){
                 TraderStatus state = Trader.getStatus(((Player)sender).getName());
-                state.setStatus(Status.SET_PRICE);
+                state.setStatus(Status.SET_PRICE_SELL);
                 double price = Double.parseDouble(args[1]);
                 state.setMoney(price);
             }
+            return true;
         }
         
+        case buyprice:{
+            if(args.length == 2){
+                TraderStatus state = Trader.getStatus(((Player)sender).getName());
+                state.setStatus(Status.SET_PRICE_BUY);
+                double price = Double.parseDouble(args[1]);
+                state.setMoney(price);
+            }
+            return true;
+        }
+
         case setwallet:{
 
             if(args.length<2){sender.sendMessage(ChatColor.RED + "Wallet Type needed!");return true;}
             TraderStatus state = Trader.getStatus(((Player)sender).getName());
             WalletType type = WalletType.valueOf(args[1].toUpperCase());
             if(type==null){sender.sendMessage(ChatColor.RED + "Invalid Wallet Type!");return true;}
-            
+
             if((type!= WalletType.ADMIN || type!= WalletType.PRIVATE) && args.length != 3){
                 sender.sendMessage(ChatColor.RED + "Account info error!");
                 return true;
@@ -144,26 +155,38 @@ public class CitiTrader extends JavaPlugin {
             else{
                 state.setAccName(args[2]);
             }
+            
+            if(!type.hasPermission(sender)){
+                sender.sendMessage(ChatColor.RED + "You don't have permission to use this wallet type!");
+            }
+            
             state.setStatus(Status.SET_WALLET);
             state.setWalletType(type);
-            
-            
-            
-            
+
+
+            return true;            
         }
-        
+
         case wallet:{
-            //TODO: Give/take from wallet
             if(args.length<3){sender.sendMessage(ChatColor.RED + "transaction type and amount needed");return true;}
-            
+
             if(args[1].equalsIgnoreCase("give")){
-                
+                TraderStatus status = Trader.getStatus(player.getName());
+                status.setStatus(Status.GIVE_MONEY);
+                status.setMoney(Double.parseDouble(args[2]));
             }
+
+            if(args[1].equalsIgnoreCase("take")){
+                TraderStatus status = Trader.getStatus(player.getName());
+                status.setStatus(Status.TAKE_MONEY);
+                status.setMoney(Double.parseDouble(args[2]));
+            }
+            return true;
         }
 
         }
 
-        return true;
+        return false;
     }
 
     private String compact(String[] a ,int idx){
@@ -176,7 +199,8 @@ public class CitiTrader extends JavaPlugin {
     }
 
     private enum Subcommand{
-        setprice,
+        sellprice,
+        buyprice,
         create,
         setwallet,
         wallet,

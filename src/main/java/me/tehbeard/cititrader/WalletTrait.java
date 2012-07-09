@@ -1,11 +1,12 @@
 package me.tehbeard.cititrader;
 
+import org.bukkit.permissions.Permissible;
+
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 /**
  * Wallet for traders
@@ -47,7 +48,11 @@ public class WalletTrait extends Trait {
         PRIVATE,
         OWNER,
         BANK,
-        ADMIN
+        ADMIN;
+        
+        public boolean hasPermission(Permissible p){
+            return p.hasPermission("traders.wallet." + this.toString().toLowerCase());
+        }
     }
 
 
