@@ -4,6 +4,7 @@ package me.tehbeard.cititrader;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -22,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
+import me.tehbeard.cititrader.utils.TraderUtils;
 
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
@@ -94,17 +96,17 @@ public class Trader extends Character implements Listener{
             case SET_PRICE_SELL:{
                 state.getTrader().getTrait(StockRoomTrait.class).setSellPrice(by.getItemInHand(),state.getMoney());
                 state.setStatus(Status.NOT);
-                by.sendMessage("Price set");
+                by.sendMessage("Sell Price set");
                 return;
             }
-            
+
             case SET_PRICE_BUY:{
                 state.getTrader().getTrait(StockRoomTrait.class).setBuyPrice(by.getItemInHand(),state.getMoney());
                 state.setStatus(Status.NOT);
-                by.sendMessage("Price set");
+                by.sendMessage("Buy Price set");
                 return;
             }
-            
+
             case SET_WALLET:
             {
                 state.getTrader().getTrait(WalletTrait.class).setAccount(state.getAccName());
@@ -136,13 +138,13 @@ public class Trader extends Character implements Listener{
                 return;
             }
             case TAKE_MONEY:
-                
+
                 if(state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE){
                     by.sendMessage(ChatColor.RED + "Cannot use give/take on traders who use economy backed accounts.");
                     return;
                 }
                 WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
-                
+
                 if(!wallet.has(state.getMoney())){
                     by.sendMessage(ChatColor.RED + "Not enough funds.");
                     return;
@@ -200,19 +202,20 @@ public class Trader extends Character implements Listener{
     public void inventoryClick(InventoryClickEvent event){
         TraderStatus state = getStatus(event.getWhoClicked().getName());
 
-        //cancel if not item or not in trade windows
-        if(event.getCurrentItem().getType() == Material.AIR || state.getStatus() == Status.NOT){return;}
+        //stop if not item or not in trade windows
+        if(event.getCurrentItem() == null || state.getStatus() == Status.NOT){return;}
 
         //cancel the event.
-        event.setCancelled(true);
-
+        if(state.getStatus() != Status.STOCKROOM && state.getStatus() != Status.SELL_BOX){
+            event.setCancelled(true);
+        }
 
 
         switch(state.getStatus()){
 
         //selecting item to purchase
         case ITEM_SELECT:{
-            if(!isTopInventory(event)){break;}
+            if(!TraderUtils.isTopInventory(event)){break;}
             if(event.isShiftClick()){
                 ItemStack is = event.getCurrentItem().clone();
                 //clear the inventory
@@ -240,7 +243,7 @@ public class Trader extends Character implements Listener{
 
         //Amount selection window
         case AMOUNT_SELECT:{
-            if(!isTopInventory(event)){break;}
+            if(!TraderUtils.isTopInventory(event)){break;}
             if(event.isShiftClick()){
                 System.out.println("AMOUNT SELECTED");
                 Player player = (Player) event.getWhoClicked();
@@ -256,9 +259,10 @@ public class Trader extends Character implements Listener{
         }break;
 
         case SELL_BOX:{
-            if(!isTopInventory(event) && !isBottomInventory(event)){break;}
-
+            if(!TraderUtils.isTopInventory(event) && !TraderUtils.isBottomInventory(event)){break;}
+            
             if(event.isShiftClick()){
+                event.setCancelled(true);
                 Player p = (Player) event.getWhoClicked();
                 double price = state.getTrader().getTrait(StockRoomTrait.class).getBuyPrice(event.getCurrentItem());
                 p.sendMessage("item price: " + price);
@@ -273,17 +277,6 @@ public class Trader extends Character implements Listener{
     }
 
 
-    public boolean isTopInventory(InventoryClickEvent event){
-        return (event.getRawSlot() < event.getView().getTopInventory().getSize() && event.getRawSlot() != InventoryView.OUTSIDE);
-    }
-
-    public boolean isBottomInventory(InventoryClickEvent event){
-
-        return (
-                event.getRawSlot() >= event.getView().getTopInventory().getSize() &&
-                event.getRawSlot() < (event.getView().getTopInventory().getSize()+event.getView().getBottomInventory().getSize()) && 
-                event.getRawSlot() != InventoryView.OUTSIDE);
-    }
 
 
     /**
@@ -295,9 +288,9 @@ public class Trader extends Character implements Listener{
         TraderStatus state = getStatus(event.getPlayer().getName());
 
         if(state.getStatus() == Status.SELL_BOX){
-            Iterator<ItemStack> it = state.getInventory().iterator();
-            while(it.hasNext()){
-                ItemStack is = it.next();
+            Inventory sellbox = state.getInventory();
+            for(int i =0; i< sellbox.getSize();i++){
+                ItemStack is = sellbox.getItem(i);
                 if(is==null){continue;}
 
                 double price = state.getTrader().getTrait(StockRoomTrait.class).getBuyPrice(is);
@@ -309,7 +302,7 @@ public class Trader extends Character implements Listener{
 
 
                 //check space
-                Inventory chkr = Bukkit.createInventory(null, 9*4);
+                Inventory chkr = Bukkit.createInventory(null, 9*6);
                 chkr.setContents(state.getTrader().getTrait(StockRoomTrait.class).getInventory().getContents());
                 if(chkr.addItem(is).size() > 0){
                     ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader does not have enough space to hold something you sold him.");
@@ -338,17 +331,20 @@ public class Trader extends Character implements Listener{
                 }
 
                 //take item
-                it.remove();
-                state.getTrader().getTrait(StockRoomTrait.class).getInventory().addItem(is);
+                sellbox.setItem(i,null);
+                if(state.getTrader().getTrait(WalletTrait.class).getType()!=WalletType.ADMIN){
+                    state.getTrader().getTrait(StockRoomTrait.class).getInventory().addItem(is);}
 
 
             }
 
             //drop all items in sellbox inventory
-            it = state.getInventory().iterator();
+            Iterator<ItemStack> it = state.getInventory().iterator();
             while(it.hasNext()){
                 ItemStack is = it.next();
-                event.getPlayer().getWorld().dropItemNaturally(event.getPlayer().getLocation(),is);
+                if(is!=null){
+                    event.getPlayer().getWorld().dropItemNaturally(event.getPlayer().getLocation().add(0.5, 0.0, 0.5),is);
+                }
             }
 
         }
@@ -383,7 +379,8 @@ public class Trader extends Character implements Listener{
 
                         //if(CitiTrader.economy.depositPlayer(storeOwner,cost).type==ResponseType.SUCCESS){
                         if(wallet.deposit(cost)){
-                            store.getInventory().removeItem(is);
+                            if(npc.getTrait(WalletTrait.class).getType()!=WalletType.ADMIN)
+                            {store.getInventory().removeItem(is);}
                             playerInv.addItem(is);                           
                         }
                         else

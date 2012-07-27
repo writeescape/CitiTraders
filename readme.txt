@@ -1,22 +1,23 @@
-CitiTraders 0.1 Beta 2 README
+CitiTraders 0.1 Beta 3 README
 
-!!!WARNING!!!!!!WARNING!!!
-!!!WARNING!!!!!!WARNING!!!
-!!!WARNING!!!!!!WARNING!!!
+Disclaimer:
+===========
+This code is beta code, in essence if it causes your server to melt etc it is not my fault, you chose to run it.
 
-CitiTraders is currently in BETA, DO NOT USE ON PRODUCTION SYSTEMS.
-
-!!!WARNING!!!!!!WARNING!!!
-!!!WARNING!!!!!!WARNING!!!
-!!!WARNING!!!!!!WARNING!!!
-
+Overview:
+=========
 CitiTraders provides a trading character type for Citizens 2.
 This character uses vault to sell items in it's stockroom to other players.
 
 Features:
-- Simple, ingame UI
+=========
+- Simple, ingame UI using inventories.
 - Support for all items (inc. Enchanted items)
 - (Future: Will support Village trader screen)
+- Selling to NPCS
+- Transaction safe*
+
+(*: Transactions may bug and result in duped money due to unforseen bugs, if such a bug is found please report it to me)
 
 Installation
 ============
@@ -28,10 +29,10 @@ Configuration
 =============
 Valid trader npc types are set in config.yml
 
-The profiles section allows you setup multiple tiers for traders.
+The profiles section allows you setup multiple tiers for traders (limits, eventually types and costs)
 
 permission node traders.profile.profilename grants a user a profile.
-default is assigned automatically, set it to 0 to prevent anyone w/o perms creating npcs.
+default is assigned automatically, set it to 0 to prevent anyone w/o a trader profile perm creating trader npcs.
 
  
 
@@ -45,23 +46,57 @@ using CitiTraders (allows prices
 /trader create name -type [TYPE] 
 [TYPE] is an npc type set in the config.yml
 
-Stocking 
-========
+Stocking a trader
+=================
 Right click a trader you own while holding a book, this will open up the stock room, place items you wish to sell in here.
 
-Price list
-==========
-
-use /trader setprice amount
-
+Price lists
+===========
+use /trader sellprice amount
+or  /trader buyprice amount
 Then right click an NPC while holding the item you wish to set a price for.
+
+sellprice sets the price an item is sold for
+buyprice sets the price the npc will buy from players
 NOTE: DAMAGE VALUES AND ENCHANTMENTS ARE RESPECTED, 
 
-Trading
-=======
-Right click the npc, left clicking will display prices in chat, Shift clicking will move through the screens and purchase items.
 
-The first screen displays all items in stock that have a price set. Shift clicking will select an item. Left click price of one item.
+Wallets and you
+===============
+A wallet is a traders mechanism for paying for items.
+wallet types:
+- private :: a special economy independent wallet that. 
+- owner :: uses the owners bank account directly.
+- bank :: Uses a bank account his owner owns. Account name must be supplied
+- admin :: A transdimensional wormhole linked to Scrooge McDuck's money bin.
 
-The second screen displays the selected item in various quantities (64,32,16,8,4,2,1). Shift click purchases that stack, left click shows price of that stack.
+/trader setwallet [type] [account name]
 
+With a private wallet (default type), funds can be transfered using
+/trader wallet give [amount]
+/trader wallet take [amount]
+Trading with an npc
+===================
+1) Right click the npc
+2) in the inventory left clicking an item will display prices in chat, 
+   Shift clicking will move through the screens and purchase items.
+
+3) The first screen displays all items in stock that have a price set for sale. 
+   Shift clicking will select an item. Left click price of one item.
+
+4) The second screen displays the selected item in various quantities (64,32,16,8,4,2,1). 
+   Shift click purchases that stack, left click shows price of that stack.
+
+5) Close the inventory to finish trading.
+
+Selling to an npc
+=================
+1) Left click the NPC
+
+2) Shift click will tell you price per item and for that stack
+
+3) Drag into the top invetory to sell.
+
+4) Close to complete transaction
+
+5) Any additional items will be dropped at your feet.

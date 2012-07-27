@@ -14,30 +14,28 @@ commands:
           /<command> buyprice price - Set buying price for item currently in hand, right click npc to set price for them.
         
 permissions:
-  traders.*:
-    description: Gives access to all trader functionality, ALSO OVERRIDES OWNER PROTECTION
-    default: op
-    children:
-      traders.commands.*: true
   traders.command.*:
     description: Grants access to all trader commands
     default: op
     children:
       traders.command.create: true
-      traders.command.setprice: true
-      traders.command.buyorder: true
+      traders.command.sellprice: true
+      traders.command.buyprice: true
       traders.command.fire: true
   traders.command.create:
     description: Can create traders using /trader create
     default: op
-  traders.command.setprice:
+  traders.command.sellprice:
     description: can set sale prices of traders
     default: op
-  traders.command.buyorder:
+  traders.command.buyprice:
     description: Can set purchase orders
     default: op
-  traders.command.fire:
-    description: Can fire (remove) a trader NPC they own
+  traders.command.setwallet:
+    description: Set an npc's wallet type
+    default: op
+  traders.command.wallet:
+    description: Give/take from an npc wallet.
     default: op
   traders.wallet.private:
     description: Allows user to set traders to use their own private wallet.

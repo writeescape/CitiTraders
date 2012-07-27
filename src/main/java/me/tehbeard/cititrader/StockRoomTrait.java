@@ -20,6 +20,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
     private Inventory stock;
     Map<ItemStack,Double> sellPrices;
     Map<ItemStack,Double> buyPrices;
+    
     public StockRoomTrait(){
         this(54);
     }
@@ -91,7 +92,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
         
         DataKey buyPriceIndex = data.getRelative("buyprices");
         i = 0;
-        for(Entry<ItemStack,Double> price : sellPrices.entrySet()){
+        for(Entry<ItemStack,Double> price : buyPrices.entrySet()){
             if(price.getValue() > 0.0D){
                 ItemStorage.saveItem(buyPriceIndex.getRelative("" + i).getRelative("item"), price.getKey());
                 buyPriceIndex.getRelative("" + i++).setDouble("price", price.getValue());
@@ -181,14 +182,14 @@ public class StockRoomTrait extends Trait implements InventoryHolder {
     public double getBuyPrice(ItemStack is){
         ItemStack i = is.clone();
         i.setAmount(1);
-        return sellPrices.containsKey(i) ? sellPrices.get(i) : 0;
+        return buyPrices.containsKey(i) ? buyPrices.get(i) : 0;
 
     }
 
     public void setBuyPrice(ItemStack is,double price){
         ItemStack i = is.clone();
         i.setAmount(1);
-        sellPrices.put(i, price);
+        buyPrices.put(i, price);
 
     }
 }
