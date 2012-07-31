@@ -5,10 +5,9 @@ import me.tehbeard.cititrader.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.ArgumentPack;
 import net.citizensnpcs.api.CitizensPlugin;
 import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.character.CharacterFactory;
 import net.citizensnpcs.api.trait.TraitFactory;
+import net.citizensnpcs.api.trait.TraitInfo;
 import net.citizensnpcs.api.trait.trait.Owner;
-import net.citizensnpcs.api.npc.character.Character;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
@@ -44,14 +43,14 @@ public class CitiTrader extends JavaPlugin {
         if(setupEconomy()){
             self = this;
             citizens = (CitizensPlugin) Bukkit.getPluginManager().getPlugin("Citizens");
-            citizens.getTraitManager().registerTrait(new TraitFactory(StockRoomTrait.class).withName("stockroom").withPlugin(this));
-            citizens.getTraitManager().registerTrait(new TraitFactory(WalletTrait.class).withName("wallet").withPlugin(this));
-            citizens.getCharacterManager().registerCharacter(new CharacterFactory(Trader.class).withName("trader"));
+            citizens.getTraitFactory().registerTrait(TraitInfo.create(StockRoomTrait.class).withName("stockroom"));
+            citizens.getTraitFactory().registerTrait(TraitInfo.create(WalletTrait.class).withName("wallet"));
+            //citizens.getCharacterManager().registerCharacter(new CharacterFactory(Trader.class).withName("trader"));
+
+            Bukkit.getPluginManager().registerEvents(new Trader(), this);
 
 
 
-
-            Bukkit.getPluginManager().registerEvents((Listener) citizens.getCharacterManager().getCharacter("trader"), this);
 
         }else{
 
@@ -90,7 +89,6 @@ public class CitiTrader extends JavaPlugin {
                 npcType = EntityType.fromName(argPack.getOption("type").toUpperCase());
             }
 
-            Character character = Style.trader.getCharacter();
             //TODO: UNCOMMENT WHEN 1.3 COMES OUT
             /*if(argPack.getOption("type")!=null && isValidNPCType(player,argPack.getOption("style").toUpperCase())){
                 character = Style.valueOf(argPack.getOption("style").toUpperCase()).getCharacter();
@@ -100,10 +98,13 @@ public class CitiTrader extends JavaPlugin {
             String npcName = argPack.get(0);
 
             int owned = 0;
-            for(NPC npc:citizens.getNPCRegistry().getNPCs(Trader.class)){
-                if(npc.getTrait(Owner.class).getOwner().equalsIgnoreCase(player.getName())){
 
-                    owned +=1;
+            for(NPC npc:citizens.getNPCRegistry()){
+                if(npc.hasTrait(StockRoomTrait.class)){
+                    if(npc.getTrait(Owner.class).getOwner().equalsIgnoreCase(player.getName())){
+
+                        owned +=1;
+                    }
                 }
             }
             int traderLimit = getTraderLimit(player);
@@ -114,7 +115,10 @@ public class CitiTrader extends JavaPlugin {
 
 
 
-            NPC npc = citizens.getNPCRegistry().createNPC(npcType, npcName, character);
+            //, character);
+            NPC npc = citizens.getNPCRegistry().createNPC(npcType, npcName);
+            Trader.setUpNPC(npc);
+            
             npc.getTrait(Owner.class).setOwner(player.getName());
             npc.spawn(player.getLocation());
 
@@ -130,7 +134,7 @@ public class CitiTrader extends JavaPlugin {
             }
             return true;
         }
-        
+
         case buyprice:{
             if(args.length == 2){
                 TraderStatus state = Trader.getStatus(((Player)sender).getName());
@@ -148,18 +152,19 @@ public class CitiTrader extends JavaPlugin {
             WalletType type = WalletType.valueOf(args[1].toUpperCase());
             if(type==null){sender.sendMessage(ChatColor.RED + "Invalid Wallet Type!");return true;}
 
-            if((type!= WalletType.ADMIN || type!= WalletType.PRIVATE) && args.length != 3){
-                sender.sendMessage(ChatColor.RED + "Account info error!");
+            if(type == WalletType.BANK && args.length != 3){
+                sender.sendMessage(ChatColor.RED + "An account name is needed for this type of wallet");
                 return true;
             }
             else{
+                
                 state.setAccName(args[2]);
             }
-            
+
             if(!type.hasPermission(sender)){
                 sender.sendMessage(ChatColor.RED + "You don't have permission to use this wallet type!");
             }
-            
+
             state.setStatus(Status.SET_WALLET);
             state.setWalletType(type);
 
@@ -216,12 +221,6 @@ public class CitiTrader extends JavaPlugin {
         private Style(String charName){
             this.charName=charName;
         }
-
-        public Character getCharacter(){
-            return citizens.getCharacterManager().getCharacter(charName);
-        }
-
-
     }
 
     public boolean isValidNPCType(Player player,String type){

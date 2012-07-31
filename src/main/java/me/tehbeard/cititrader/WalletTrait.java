@@ -20,15 +20,13 @@ import net.citizensnpcs.api.util.DataKey;
  */
 public class WalletTrait extends Trait {
 
+    public WalletTrait() {
+        super("wallet");
+    }
+
     WalletType type = WalletType.PRIVATE;
     double amount = 0;
     String account = "";
-    NPC npc;
-
-    
-    public WalletTrait(NPC npc){
-        this.npc = npc;
-    }
 
     @Override
     public void load(DataKey key) throws NPCLoadException {
@@ -40,7 +38,7 @@ public class WalletTrait extends Trait {
     @Override
     public void save(DataKey key) {
         key.setString("type", type.toString());
-        key.setDouble("amount",key.getDouble("amount"));
+        key.setDouble("amount",amount);
         key.setString("account",account);
     }
 
@@ -83,7 +81,7 @@ public class WalletTrait extends Trait {
         if(amount <= 0 || amount > this.amount){return false;}
         
         switch(type){
-        case PRIVATE: this.amount+=amount;return true;
+        case PRIVATE: this.amount-=amount;return true;
         case   OWNER: return CitiTrader.economy.withdrawPlayer(npc.getTrait(Owner.class).getOwner(), amount).transactionSuccess();
         case    BANK: return CitiTrader.economy.isBankOwner(account, npc.getTrait(Owner.class).getOwner()).transactionSuccess() ? CitiTrader.economy.bankWithdraw(account, amount).transactionSuccess() : false;
         case   ADMIN: return true;
