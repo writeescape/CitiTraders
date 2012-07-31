@@ -243,6 +243,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
 
         //stop if not item or not in trade windows
         if(event.getCurrentItem() == null || state.getStatus() == Status.NOT){return;}
+        
 
         //cancel the event.
         if(state.getStatus() != Status.STOCKROOM && state.getStatus() != Status.SELL_BOX){
@@ -275,7 +276,11 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
             else
             {
                 Player p = (Player) event.getWhoClicked();
-                double price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrice(event.getCurrentItem());
+                ItemStack is = event.getCurrentItem();
+                if(is==null){
+                    return;
+                }
+                double price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrice(is);
                 p.sendMessage("Item costs: " + price);
             }
         }break;

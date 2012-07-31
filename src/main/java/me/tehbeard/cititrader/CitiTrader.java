@@ -157,8 +157,11 @@ public class CitiTrader extends JavaPlugin {
                 return true;
             }
             else{
-                
-                state.setAccName(args[2]);
+                String an = "";
+                if(args.length>2){
+                    an = args[2];
+                }
+                state.setAccName(an);
             }
 
             if(!type.hasPermission(sender)){
