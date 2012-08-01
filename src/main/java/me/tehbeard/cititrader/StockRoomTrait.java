@@ -56,7 +56,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
     public void load(DataKey data) throws NPCLoadException {
 
         enableLeftClick = data.getBoolean("enableLeftClick");
-        enableLeftClick = data.getBoolean("enableRightClick");
+        enableRightClick = data.getBoolean("enableRightClick");
         //Load the inventory
         for (DataKey slotKey : data.getRelative("inv").getIntegerSubKeys()){
             stock.setItem(

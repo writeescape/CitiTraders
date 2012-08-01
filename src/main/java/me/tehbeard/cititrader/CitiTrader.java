@@ -194,6 +194,7 @@ public class CitiTrader extends JavaPlugin {
         case fire:{
             TraderStatus status = Trader.getStatus(player.getName());
             status.setStatus(Status.FIRING);
+            return true;
         }
         }
         
