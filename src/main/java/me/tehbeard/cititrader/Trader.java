@@ -60,8 +60,9 @@ public class Trader implements Listener{
         if(!npc.hasTrait(StockRoomTrait.class)){
             return;
         }
-        
-        npc.getTrait(StockRoomTrait.class).openBuyWindow(by);
+        if(npc.getTrait(StockRoomTrait.class).isEnableLeftClick()){
+            npc.getTrait(StockRoomTrait.class).openBuyWindow(by);
+        }
 
     }
 
@@ -74,6 +75,9 @@ public class Trader implements Listener{
             return;
         }
 
+        if(!npc.getTrait(StockRoomTrait.class).isEnableRightClick()){
+            return;
+        }
         TraderStatus state = getStatus(by.getName());
         state.setTrader(npc);
         String owner = npc.getTrait(Owner.class).getOwner();
@@ -92,7 +96,7 @@ public class Trader implements Listener{
                     clearStatus(by.getName());
                     return;
                 }
-                
+
                 by.sendMessage("Firing trader!");
                 npc.removeTrait(StockRoomTrait.class);
                 npc.removeTrait(WalletTrait.class);

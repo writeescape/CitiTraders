@@ -32,6 +32,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
     private Inventory stock;
     Map<ItemStack,Double> sellPrices;
     Map<ItemStack,Double> buyPrices;
+    
+    boolean enableLeftClick;
+    boolean enableRightClick;
 
     public StockRoomTrait(){
 
@@ -45,11 +48,15 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
         stock = Bukkit.createInventory(this,size,"stockroom");
         sellPrices = new HashMap<ItemStack, Double>();
         buyPrices = new HashMap<ItemStack, Double>();
+        enableLeftClick  = true;
+        enableRightClick = true;
     }
 
     @Override
     public void load(DataKey data) throws NPCLoadException {
 
+        enableLeftClick = data.getBoolean("enableLeftClick");
+        enableLeftClick = data.getBoolean("enableRightClick");
         //Load the inventory
         for (DataKey slotKey : data.getRelative("inv").getIntegerSubKeys()){
             stock.setItem(
@@ -83,6 +90,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
     @Override
     public void save(DataKey data) {
 
+        data.setBoolean("enableRightClick",enableRightClick);
+        data.setBoolean("enableLeftClick",enableLeftClick);
+        
         //save the inventory
         int i = 0;
         for(ItemStack is : stock.getContents()){
@@ -458,4 +468,22 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
         
         return true;
     }
+
+    public boolean isEnableLeftClick() {
+        return enableLeftClick;
+    }
+
+    public void setEnableLeftClick(boolean enableLeftClick) {
+        this.enableLeftClick = enableLeftClick;
+    }
+
+    public boolean isEnableRightClick() {
+        return enableRightClick;
+    }
+
+    public void setEnableRightClick(boolean enableRightClick) {
+        this.enableRightClick = enableRightClick;
+    }
+    
+    
 }
