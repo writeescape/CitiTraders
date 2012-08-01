@@ -191,8 +191,12 @@ public class CitiTrader extends JavaPlugin {
             }
             return true;
         }
-
+        case fire:{
+            TraderStatus status = Trader.getStatus(player.getName());
+            status.setStatus(Status.FIRING);
         }
+        }
+        
 
         return false;
     }
@@ -212,6 +216,7 @@ public class CitiTrader extends JavaPlugin {
         create,
         setwallet,
         wallet,
+        fire
 
     }
 

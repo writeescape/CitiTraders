@@ -447,4 +447,12 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
 
 
     }
+
+    public boolean isStockRoomEmpty() {
+        for(ItemStack is : stock){
+            if(is!=null){return false;}
+        }
+        
+        return true;
+    }
 }

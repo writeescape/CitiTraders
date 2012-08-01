@@ -3,35 +3,25 @@ package me.tehbeard.cititrader;
 
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.command.CommandSender;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemStack;
 
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
-import me.tehbeard.cititrader.utils.TraderUtils;
 
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
-import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Owner;
-import net.citizensnpcs.api.util.DataKey;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
+
 
 
 /**
@@ -67,15 +57,22 @@ public class Trader implements Listener{
         NPC npc = event.getNPC();
         Player by = event.getClicker();
 
+        if(!npc.hasTrait(StockRoomTrait.class)){
+            return;
+        }
+        
         npc.getTrait(StockRoomTrait.class).openBuyWindow(by);
 
     }
 
 
     @EventHandler
-    public void onRightClick(NPCRightClickEvent  event) {
+    public void onRightClick(NPCRightClickEvent event) {
         NPC npc = event.getNPC();
         Player by = event.getClicker();
+        if(!npc.hasTrait(StockRoomTrait.class)){
+            return;
+        }
 
         TraderStatus state = getStatus(by.getName());
         state.setTrader(npc);
@@ -84,6 +81,23 @@ public class Trader implements Listener{
         if(by.getName().equalsIgnoreCase(owner)){
 
             switch(state.getStatus()){
+            case FIRING:{
+                if(!state.getTrader().getTrait(StockRoomTrait.class).isStockRoomEmpty()){
+                    by.sendMessage("Cannot fire trader! He still has items on him!");
+                    clearStatus(by.getName());
+                    return;
+                }
+                if(state.getTrader().getTrait(WalletTrait.class).getType() == WalletType.PRIVATE && state.getTrader().getTrait(WalletTrait.class).getAmount() > 0.0D){
+                    by.sendMessage("Trader still has money in their wallet!");
+                    clearStatus(by.getName());
+                    return;
+                }
+                
+                by.sendMessage("Firing trader!");
+                npc.removeTrait(StockRoomTrait.class);
+                npc.removeTrait(WalletTrait.class);
+                npc.destroy();
+            }
             case SET_PRICE_SELL:{
                 state.getTrader().getTrait(StockRoomTrait.class).setSellPrice(by.getItemInHand(),state.getMoney());
                 state.setStatus(Status.NOT);

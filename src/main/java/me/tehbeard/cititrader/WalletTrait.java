@@ -120,6 +120,17 @@ public class WalletTrait extends Trait {
     public final void setAccount(String account) {
         this.account = account;
     }
+    
+    public final double getAmount(){
+        switch(type){
+        case PRIVATE: return this.amount;
+        case   OWNER: return CitiTrader.economy.getBalance(npc.getTrait(Owner.class).getOwner());
+        case    BANK: return CitiTrader.economy.isBankOwner(account, npc.getTrait(Owner.class).getOwner()).transactionSuccess() ? CitiTrader.economy.bankBalance(account).amount : 0.0D;
+        case   ADMIN: return 0.0D;
+        }
+        throw new IllegalStateException("NO VALID WALLET TYPE SELECTED");
+        
+    }
 
 }
 

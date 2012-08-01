@@ -17,7 +17,8 @@ public class TraderStatus {
         SET_WALLET,
         SELL_BOX,
         GIVE_MONEY,
-        TAKE_MONEY
+        TAKE_MONEY,
+        FIRING
         
         
     }

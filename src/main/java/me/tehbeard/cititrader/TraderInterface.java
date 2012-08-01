@@ -77,4 +77,6 @@ public interface TraderInterface {
      * @param event
      */
     public void processInventoryClose(InventoryCloseEvent event);
+    
+    public boolean isStockRoomEmpty();
 }
