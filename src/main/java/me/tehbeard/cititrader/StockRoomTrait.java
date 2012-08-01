@@ -383,6 +383,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
 
         if(state.getStatus() == Status.SELL_BOX){
             Inventory sellbox = state.getInventory();
+            Double total = 0.0D;
             for(int i =0; i< sellbox.getSize();i++){
                 ItemStack is = sellbox.getItem(i);
                 if(is==null){continue;}
@@ -423,7 +424,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
                     wallet.deposit(sale);
                     break;
                 }
-
+                total += sale;
                 //take item
                 sellbox.setItem(i,null);
                 if(state.getTrader().getTrait(WalletTrait.class).getType()!=WalletType.ADMIN){
@@ -432,6 +433,8 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
 
             }
 
+            
+            ((Player) event.getPlayer()).sendMessage("Total money from sale to trader: " + total );
             //drop all items in sellbox inventory
             Iterator<ItemStack> it = state.getInventory().iterator();
             while(it.hasNext()){
