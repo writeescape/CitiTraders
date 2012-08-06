@@ -1,6 +1,5 @@
 package me.tehbeard.cititrader;
 
-import me.tehbeard.cititrader.CitiTrader.Subcommand;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.ArgumentPack;
@@ -85,6 +84,7 @@ public class CitiTrader extends JavaPlugin {
         Subcommand subCom;
         try{
         subCom = Subcommand.valueOf(args[0]);
+        }
         catch(Exception e){
             return false;
         }
