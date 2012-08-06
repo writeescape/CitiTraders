@@ -1,4 +1,10 @@
-CitiTraders 0.1 Beta 3 README
+CitiTraders 0.1 Beta 4 README
+
+In this release
+===============
+* Bug fixes
+* Firing a trader
+* ability to switch off left and right click per NPC trader (config only)
 
 Disclaimer:
 ===========
@@ -95,8 +101,14 @@ Selling to an npc
 
 2) Shift click will tell you price per item and for that stack
 
-3) Drag into the top invetory to sell.
+3) Drag into the top inventory to sell.
 
 4) Close to complete transaction
 
 5) Any additional items will be dropped at your feet.
+
+Firing an npc
+=============
+1) /trader fire
+2) right click NPC
+3) if npc's inventory is empty and he has no money in his pockets (private wallet only) he will be fired. 

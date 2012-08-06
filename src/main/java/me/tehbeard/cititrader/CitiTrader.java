@@ -1,5 +1,6 @@
 package me.tehbeard.cititrader;
 
+import me.tehbeard.cititrader.CitiTrader.Subcommand;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.ArgumentPack;
@@ -56,7 +57,7 @@ public class CitiTrader extends JavaPlugin {
 
 
 
-            getLogger().severe("VAULT NOT FOUND, TRADERS DISABLED");
+            getLogger().severe("COULD NOT FIND AN ECONOMY PLUGIN");
         }
 
         getLogger().info("v" + getDescription().getVersion() + " loaded");
@@ -81,7 +82,13 @@ public class CitiTrader extends JavaPlugin {
 
         Player player = (Player)sender;
         if(!sender.hasPermission(PERM_PREFIX + ".command." + args[0])){return false;}
-        switch(Subcommand.valueOf(args[0])){
+        Subcommand subCom;
+        try{
+        subCom = Subcommand.valueOf(args[0]);
+        catch(Exception e){
+            return false;
+        }
+        switch(subCom){
         case create:{
             ArgumentPack argPack = new ArgumentPack(new String[0], new String[] {"type","style"},compact(args,1));
             EntityType npcType = EntityType.PLAYER;
