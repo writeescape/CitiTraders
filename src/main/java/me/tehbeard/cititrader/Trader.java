@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
@@ -21,6 +22,9 @@ import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Owner;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.inventory.ItemStack;
 
 
 
@@ -197,15 +201,14 @@ public class Trader implements Listener{
     }
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void inventoryClick(InventoryClickEvent event){
         TraderStatus state = getStatus(event.getWhoClicked().getName());
+        
         if(state.getStatus() != Status.NOT){
             state.getTrader().getTrait(StockRoomTrait.class).processInventoryClick(event);
         }
     }
-
-
 
 
     /**
@@ -220,6 +223,10 @@ public class Trader implements Listener{
         }
     }
 
-
+    @EventHandler
+    public void test(InventoryEvent event) {
+        
+        System.out.println("test");
+    }
 
 }

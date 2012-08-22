@@ -4,7 +4,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
+import me.tehbeard.cititrader.TraderStatus.Status;
+import me.tehbeard.cititrader.WalletTrait.WalletType;
+import me.tehbeard.cititrader.utils.TraderUtils;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
+import net.citizensnpcs.api.exception.NPCLoadException;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.Trait;
+import net.citizensnpcs.api.util.DataKey;
+import net.citizensnpcs.api.util.ItemStorage;
+import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,17 +25,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import me.tehbeard.cititrader.TraderStatus.Status;
-import me.tehbeard.cititrader.WalletTrait.WalletType;
-import me.tehbeard.cititrader.utils.TraderUtils;
-import net.citizensnpcs.api.exception.NPCLoadException;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.trait.Trait;
-import net.citizensnpcs.api.trait.trait.Owner;
-import net.citizensnpcs.api.util.DataKey;
-import net.citizensnpcs.api.util.ItemStorage;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
-
 public class StockRoomTrait extends Trait implements InventoryHolder,TraderInterface {
 
     private Inventory stock;
@@ -35,6 +33,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
     
     boolean enableLeftClick;
     boolean enableRightClick;
+    boolean adminShop;
 
     public StockRoomTrait(){
 
@@ -57,6 +56,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
 
         enableLeftClick = data.getBoolean("enableLeftClick");
         enableRightClick = data.getBoolean("enableRightClick");
+
         //Load the inventory
         for (DataKey slotKey : data.getRelative("inv").getIntegerSubKeys()){
             stock.setItem(
@@ -130,7 +130,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
 
 
     /**
-     * Contstruct a viewing inventory 
+     * Construct a viewing inventory 
      * @return
      */
     private Inventory constructViewing(){
@@ -261,13 +261,31 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
         }
 
 
+        if(event.getRawSlot() == 45) {
+            //openSalesWindow((Player) event.getWhoClicked());
+            
+            //state.setStatus(Status.ITEM_SELECT);
+            //state.setInventory(constructViewing());
+            //((Player)event.getWhoClicked()).openInventory(state.getInventory());
+            ((Player)event.getWhoClicked()).closeInventory();
+            final NPCRightClickEvent npcevent = new NPCRightClickEvent(npc, (Player)event.getWhoClicked());
+            CitiTrader.self.getServer().getScheduler().scheduleSyncDelayedTask(CitiTrader.self, new Runnable() {
+                @Override
+                public void run() {
+                    CitiTrader.self.getServer().getPluginManager().callEvent(npcevent);
+                }
+            }, 10);
+            //CitiTrader.self.getServer().getPluginManager().callEvent(npcevent);
+            return;
+        }
         switch(state.getStatus()){
 
         //selecting item to purchase
         case ITEM_SELECT:{
             if(!TraderUtils.isTopInventory(event)){break;}
             if(event.isShiftClick()){
-                ItemStack is = event.getCurrentItem().clone();
+                buildSellWindow(event.getCurrentItem().clone(), state);
+                /*ItemStack is = event.getCurrentItem().clone();
                 //clear the inventory
                 for(int i =0;i<54; i++){
                     state.getInventory().setItem(i, null);
@@ -276,12 +294,15 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
                 //set up the amount selection
                 int k = 0;
                 for(int i=64;i>0;i/=2){
-                    is.setAmount(i);
-                    state.getInventory().setItem(k, is);
+                    ItemStack newIs = is.clone();
+                    newIs.setAmount(i);
+                    if(hasStock(newIs, true)) {
+                        state.getInventory().setItem(k, newIs);
+                    }
                     k++;
                 }
                 state.setStatus(Status.AMOUNT_SELECT);
-                System.out.println("ITEM SELECTED");
+                System.out.println("ITEM SELECTED");*/
             }
             else
             {
@@ -299,10 +320,12 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
         case AMOUNT_SELECT:{
             if(!TraderUtils.isTopInventory(event)){break;}
             if(event.isShiftClick()){
+                event.setCancelled(true);
                 System.out.println("AMOUNT SELECTED");
                 Player player = (Player) event.getWhoClicked();
                 sellToPlayer(player,state.getTrader(),event.getCurrentItem());
-
+                //event.setCurrentItem(new ItemStack(Material.AIR, 0));
+                event.setCursor(new ItemStack(Material.AIR, 0));
             }
             else
             {
@@ -334,6 +357,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
     private void sellToPlayer(Player player,NPC npc,ItemStack is){
         //TODO: If admin shop, do not deduct items.
         StockRoomTrait store = npc.getTrait(StockRoomTrait.class);
+        TraderStatus state = Trader.getStatus(player.getName());
 
 
         if(store.hasStock(is, true)){
@@ -342,7 +366,13 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
 
             Inventory chkr = Bukkit.createInventory(null, 9*4);
 
-            chkr.setContents(playerInv.getContents());
+            for(ItemStack item : playerInv.getContents()) {
+                try {
+                    ItemStack newItem = item.clone();
+                    chkr.addItem(newItem);
+                } catch (Exception e) {}
+            }
+            //chkr.setContents(playerInv.getContents());
             if(chkr.addItem(is).size() > 0){
                 player.sendMessage(ChatColor.RED + "You do not have enough space to purchase that item");
             }
@@ -358,8 +388,13 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
                         //if(CitiTrader.economy.depositPlayer(storeOwner,cost).type==ResponseType.SUCCESS){
                         if(wallet.deposit(cost)){
                             if(npc.getTrait(WalletTrait.class).getType()!=WalletType.ADMIN)
-                            {store.getInventory().removeItem(is);}
-                            playerInv.addItem(is);                           
+                            {
+                                store.getInventory().removeItem(is);
+                            }
+                            
+                            playerInv.addItem(is);
+                            
+                            buildSellWindow(is, state);
                         }
                         else
                         {
@@ -413,7 +448,6 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
                     ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader does not have enough space to hold something you sold him.");
                     continue;
                 }
-                chkr = null;
 
                 WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
                 //check we have the cash
@@ -485,5 +519,25 @@ public class StockRoomTrait extends Trait implements InventoryHolder,TraderInter
         this.enableRightClick = enableRightClick;
     }
     
-    
+    public void buildSellWindow(ItemStack item, TraderStatus state) {
+        ItemStack is = item.clone();
+        //clear the inventory
+        for (int i = 0; i < 54; i++) {
+            state.getInventory().setItem(i, null);
+        }
+
+        //set up the amount selection
+        int k = 0;
+        for (int i = 64; i > 0; i /= 2) {
+            ItemStack newIs = is.clone();
+            newIs.setAmount(i);
+            if (hasStock(newIs, true)) {
+                state.getInventory().setItem(k, newIs);
+            }
+            k++;
+        }
+        state.getInventory().setItem(45, new ItemStack(Material.ARROW, 1));
+        state.setStatus(Status.AMOUNT_SELECT);
+        System.out.println("ITEM SELECTED");
+    }
 }

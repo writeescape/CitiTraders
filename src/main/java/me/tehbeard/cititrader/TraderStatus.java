@@ -1,9 +1,8 @@
 package me.tehbeard.cititrader;
 
-import org.bukkit.inventory.Inventory;
-
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.inventory.Inventory;
 
 public class TraderStatus {
 
@@ -26,6 +25,7 @@ public class TraderStatus {
     private Status status = Status.NOT;
     private double money;
     private Inventory inventory;
+    private Inventory tempInv;
     private WalletType walletType;
     private String accName;
     
@@ -73,6 +73,10 @@ public class TraderStatus {
 
     public Inventory getInventory() {
         return inventory;
+    }
+    
+    public Inventory getTempInv() {
+        return tempInv;
     }
 
     public void setInventory(Inventory inventory) {
