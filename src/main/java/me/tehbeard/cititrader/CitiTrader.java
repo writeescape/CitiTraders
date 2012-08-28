@@ -1,5 +1,6 @@
 package me.tehbeard.cititrader;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
@@ -18,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mcstats.MetricsLite;
 
 /**
  * Provides a trader for
@@ -51,6 +53,12 @@ public class CitiTrader extends JavaPlugin {
             getLogger().severe("COULD NOT FIND AN ECONOMY PLUGIN");
         }
 
+        try {
+            MetricsLite metrics = new MetricsLite(this);
+            metrics.start();
+        } catch (IOException e) {
+            // Failed to submit the stats :-(
+        }
         getLogger().log(Level.INFO, "v{0} loaded", getDescription().getVersion());
     }
 
@@ -211,7 +219,6 @@ public class CitiTrader extends JavaPlugin {
                 return true;
             }
             case setadmin: {
-                
             }
         }
 
