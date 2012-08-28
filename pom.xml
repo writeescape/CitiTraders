@@ -76,11 +76,15 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>me.tehbeard:Vocalise</include>
+                                    <include>org.mcstats</include>
                                 </includes>
 
                             </artifactSet>
                             <relocations>
+                                <relocation>
+                                    <pattern>org.mcstats</pattern>
+                                    <shadedPattern>org.shade.mcstats</shadedPattern>
+                                </relocation>
                                 <relocation>
                                     <pattern>me.tehbeard.vocalise</pattern>
                                     <shadedPattern>me.tehbeard.cititrader.vocalise</shadedPattern>
