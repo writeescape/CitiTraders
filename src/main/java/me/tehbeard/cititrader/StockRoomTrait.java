@@ -392,13 +392,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                             if (npc.getTrait(WalletTrait.class).getType() != WalletType.ADMIN) {
                                 store.getInventory().removeItem(isold);
                             }
-                            //CitiTrader.self.getServer().getScheduler().scheduleSyncDelayedTask(CitiTrader.self, new Runnable() {
-                            //@Override
-                            //public void run() {
-                            playerInv.addItem(isold);
-                            //}
-                            //}, 2);
 
+                            playerInv.addItem(isold);
+                            player.sendMessage(ChatColor.GOLD + "Item (" + isold.getType().name() + "*" + isold.getAmount() + ") purchased for " + cost + ".");
 
                             buildSellWindow(isold, state);
                         } else {
