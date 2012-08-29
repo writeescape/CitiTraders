@@ -285,7 +285,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         if (event.getCurrentItem().getType().equals(Material.AIR)) {
             return;
         }
-        
+
         switch (state.getStatus()) {
 
             //selecting item to purchase
@@ -529,13 +529,15 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
         //set up the amount selection
         int k = 0;
-        for (int i = 64; i > 0; i /= 2) {
-            ItemStack newIs = is.clone();
-            newIs.setAmount(i);
-            if (hasStock(newIs, true)) {
-                state.getInventory().setItem(k, newIs);
+        for (int i = 1; i > 64; i *= 2) {
+            if (!(i > is.getMaxStackSize())) {
+                ItemStack newIs = is.clone();
+                newIs.setAmount(i);
+                if (hasStock(newIs, true)) {
+                    state.getInventory().setItem(k, newIs);
+                }
+                k++;
             }
-            k++;
         }
         state.getInventory().setItem(45, new ItemStack(Material.ARROW, 1));
         state.setStatus(Status.AMOUNT_SELECT);
