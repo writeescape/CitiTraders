@@ -142,6 +142,11 @@ public class CitiTrader extends JavaPlugin {
             case sellprice: {
                 if (args.length == 2) {
                     TraderStatus state = Trader.getStatus(((Player) sender).getName());
+                    if(state.getStatus().equals(Status.SET_PRICE_BUY)) {
+                        sender.sendMessage("Please finish setting your buy price first");
+                        sender.sendMessage("Or cancel with /trader cancel");
+                        return true;
+                    }
                     state.setStatus(Status.SET_PRICE_SELL);
                     double price = Double.parseDouble(args[1]);
                     state.setMoney(price);
@@ -152,6 +157,11 @@ public class CitiTrader extends JavaPlugin {
             case buyprice: {
                 if (args.length == 2) {
                     TraderStatus state = Trader.getStatus(((Player) sender).getName());
+                    if(state.getStatus().equals(Status.SET_PRICE_SELL)) {
+                        sender.sendMessage("Please finish setting your sell price first");
+                        sender.sendMessage("Or cancel with /trader cancel");
+                        return true;
+                    }
                     state.setStatus(Status.SET_PRICE_BUY);
                     double price = Double.parseDouble(args[1]);
                     state.setMoney(price);
@@ -218,7 +228,11 @@ public class CitiTrader extends JavaPlugin {
                 status.setStatus(Status.FIRING);
                 return true;
             }
-            case setadmin: {
+            case cancel: {
+                TraderStatus status = Trader.getStatus(player.getName());
+                Trader.clearStatus(player.getName());
+                player.sendMessage("Status reset.");
+                return true;
             }
         }
 
@@ -245,7 +259,7 @@ public class CitiTrader extends JavaPlugin {
         setwallet,
         wallet,
         fire,
-        setadmin
+        cancel
     }
 
     private enum Style {

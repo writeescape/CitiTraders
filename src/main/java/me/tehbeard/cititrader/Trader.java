@@ -222,11 +222,4 @@ public class Trader implements Listener{
             state.getTrader().getTrait(StockRoomTrait.class).processInventoryClose(event);
         }
     }
-
-    @EventHandler
-    public void test(InventoryEvent event) {
-        
-        System.out.println("test");
-    }
-
 }

@@ -281,6 +281,11 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             //CitiTrader.self.getServer().getPluginManager().callEvent(npcevent);
             return;
         }
+        // Return if no item is selected.
+        if (event.getCurrentItem().getType().equals(Material.AIR)) {
+            return;
+        }
+        
         switch (state.getStatus()) {
 
             //selecting item to purchase
@@ -289,9 +294,10 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                     break;
                 }
                 //if (event.isShiftClick()) {
-                   //event.setCancelled(true);
+                //event.setCancelled(true);
                 //}
                 if (event.isLeftClick()) {
+
                     buildSellWindow(event.getCurrentItem().clone(), state);
                 } else {
                     Player p = (Player) event.getWhoClicked();
@@ -311,7 +317,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                     break;
                 }
                 //if (event.isShiftClick()) {
-                    //event.setCancelled(true);
+                //event.setCancelled(true);
                 //}
                 if (event.isLeftClick()) {
                     //event.setCancelled(true);
@@ -356,7 +362,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         TraderStatus state = Trader.getStatus(player.getName());
 
         ItemStack is = isold.clone();
-        
+
         if (store.hasStock(is, true)) {
 
             final Inventory playerInv = player.getInventory();
@@ -387,10 +393,10 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                                 store.getInventory().removeItem(isold);
                             }
                             //CitiTrader.self.getServer().getScheduler().scheduleSyncDelayedTask(CitiTrader.self, new Runnable() {
-                                //@Override
-                                //public void run() {
-                                    playerInv.addItem(isold);
-                                //}
+                            //@Override
+                            //public void run() {
+                            playerInv.addItem(isold);
+                            //}
                             //}, 2);
 
 
