@@ -529,8 +529,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
         //set up the amount selection
         int k = 0;
-        for (int i = 1; i > 64; i *= 2) {
-            if (!(i > is.getMaxStackSize())) {
+        for (int i = 1; i <= 64; i *= 2) {
+            System.out.println(is.getMaxStackSize());
+            if (i <= is.getMaxStackSize()) {
                 ItemStack newIs = is.clone();
                 newIs.setAmount(i);
                 if (hasStock(newIs, true)) {
