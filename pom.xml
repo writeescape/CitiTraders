@@ -70,7 +70,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <!-- Expose the build directory as a system property to unit tests -->
-                        <build.number>${BUILD_NUMBER}</build.number>
+                        <build.number>${env.BUILD_NUMBER}</build.number>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
