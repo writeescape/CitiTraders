@@ -143,13 +143,14 @@ public class CitiTrader extends JavaPlugin {
                 if (args.length == 2) {
                     TraderStatus state = Trader.getStatus(((Player) sender).getName());
                     if(state.getStatus().equals(Status.SET_PRICE_BUY)) {
-                        sender.sendMessage("Please finish setting your buy price first");
-                        sender.sendMessage("Or cancel with /trader cancel");
+                        sender.sendMessage(ChatColor.YELLOW + "Please finish setting your buy price first");
+                        sender.sendMessage(ChatColor.YELLOW + "Or cancel with /trader cancel");
                         return true;
                     }
                     state.setStatus(Status.SET_PRICE_SELL);
                     double price = Double.parseDouble(args[1]);
                     state.setMoney(price);
+                    sender.sendMessage(ChatColor.DARK_PURPLE + "Now right click with item to finish.");
                 }
                 return true;
             }
@@ -158,13 +159,14 @@ public class CitiTrader extends JavaPlugin {
                 if (args.length == 2) {
                     TraderStatus state = Trader.getStatus(((Player) sender).getName());
                     if(state.getStatus().equals(Status.SET_PRICE_SELL)) {
-                        sender.sendMessage("Please finish setting your sell price first");
-                        sender.sendMessage("Or cancel with /trader cancel");
+                        sender.sendMessage(ChatColor.YELLOW + "Please finish setting your sell price first");
+                        sender.sendMessage(ChatColor.YELLOW + "Or cancel with /trader cancel");
                         return true;
                     }
                     state.setStatus(Status.SET_PRICE_BUY);
                     double price = Double.parseDouble(args[1]);
                     state.setMoney(price);
+                    sender.sendMessage(ChatColor.DARK_PURPLE + "Now right click with item to finish.");
                 }
                 return true;
             }
@@ -234,6 +236,11 @@ public class CitiTrader extends JavaPlugin {
                 player.sendMessage("Status reset.");
                 return true;
             }
+            case version: {
+                player.sendMessage("Running Cititraders version: " + getDescription().getVersion());
+                player.sendMessage("With build number: " + System.getProperty("build.number"));
+                return true;
+            }
         }
 
 
@@ -259,7 +266,8 @@ public class CitiTrader extends JavaPlugin {
         setwallet,
         wallet,
         fire,
-        cancel
+        cancel,
+        version
     }
 
     private enum Style {

@@ -12,7 +12,7 @@
         <bukkit.version>1.3.1-R2.1-SNAPSHOT</bukkit.version>
         <citizensapi.version>2.0-SNAPSHOT</citizensapi.version>
         <vault.version>1.2.17-SNAPSHOT</vault.version>
-        <build.number>Unknown</build.number>
+        <build.number>${BUILD_NUMBER}</build.number>
     </properties>
 
     <repositories>
