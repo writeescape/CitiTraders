@@ -1,7 +1,13 @@
 package me.tehbeard.cititrader;
 
 import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import junit.framework.Assert;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.ArgumentPack;
@@ -58,6 +64,11 @@ public class CitiTrader extends JavaPlugin {
             metrics.start();
         } catch (IOException e) {
             // Failed to submit the stats :-(
+        }
+        try {
+            testManifest();
+        } catch (IOException ex) {
+            Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
         }
         getLogger().log(Level.INFO, "v{0} loaded", getDescription().getVersion());
     }
@@ -303,4 +314,15 @@ public class CitiTrader extends JavaPlugin {
 
         return limit;
     }
+    
+    public void testManifest() throws IOException {
+    URL res = Assert.class.getResource(org.junit.Assert.class.getSimpleName() + ".class");
+    JarURLConnection conn = (JarURLConnection) res.openConnection();
+    Manifest mf = conn.getManifest();
+    Attributes atts = mf.getMainAttributes();
+    for (Object v : atts.values()) {
+        System.out.println(v);
+    }
+}
+
 }
