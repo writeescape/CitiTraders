@@ -1,12 +1,10 @@
 package me.tehbeard.cititrader;
 
-import org.bukkit.permissions.Permissible;
-
 import net.citizensnpcs.api.exception.NPCLoadException;
-import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
+import org.bukkit.permissions.Permissible;
 
 /**
  * Wallet for traders
@@ -78,6 +76,7 @@ public class WalletTrait extends Trait {
      * @return
      */
     public boolean withdraw(double amount){
+        if(type.equals(WalletType.ADMIN)) {return true;}
         if(amount <= 0 || amount > this.amount){return false;}
         
         switch(type){
