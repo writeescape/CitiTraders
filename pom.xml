@@ -94,6 +94,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.mcstats</include>
+                                    <include>junit</include>
                                 </includes>
 
                             </artifactSet>
@@ -103,8 +104,8 @@
                                     <shadedPattern>org.shade.mcstats</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>me.tehbeard.vocalise</pattern>
-                                    <shadedPattern>me.tehbeard.cititrader.vocalise</shadedPattern>
+                                    <pattern>junit</pattern>
+                                    <shadedPattern>junit.shade</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
