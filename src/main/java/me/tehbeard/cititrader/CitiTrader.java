@@ -321,9 +321,9 @@ public class CitiTrader extends JavaPlugin {
     JarURLConnection conn = (JarURLConnection) res.openConnection();
     Manifest mf = conn.getManifest();
     atts = mf.getMainAttributes();
-    for (Object v : atts.values()) {
-        System.out.println(v);
-    }
+    //for (Object v : atts.values()) {
+        //System.out.println(v);
+    //}
 }
 
 }
