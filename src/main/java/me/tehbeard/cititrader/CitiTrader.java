@@ -316,7 +316,7 @@ public class CitiTrader extends JavaPlugin {
     }
     
     public void testManifest() throws IOException {
-    URL res = Assert.class.getResource(org.junit.Assert.class.getSimpleName() + ".class");
+    URL res = Assert.class.getResource(Assert.class.getSimpleName() + ".class");
     JarURLConnection conn = (JarURLConnection) res.openConnection();
     Manifest mf = conn.getManifest();
     Attributes atts = mf.getMainAttributes();
