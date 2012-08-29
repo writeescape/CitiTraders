@@ -250,7 +250,7 @@ public class CitiTrader extends JavaPlugin {
             }
             case version: {
                 player.sendMessage("Running Cititraders version: " + getDescription().getVersion());
-                player.sendMessage("With build number: " + atts.getValue("Build-Id"));
+                player.sendMessage("With build number: " + atts.getValue("Build-Tag"));
                 return true;
             }
         }
