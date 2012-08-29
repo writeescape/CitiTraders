@@ -39,6 +39,7 @@ public class CitiTrader extends JavaPlugin {
     public static Plugin self;
     public static Economy economy;
     private static CitizensPlugin citizens;
+    private static Attributes atts;
 
     @Override
     public void onEnable() {
@@ -249,7 +250,7 @@ public class CitiTrader extends JavaPlugin {
             }
             case version: {
                 player.sendMessage("Running Cititraders version: " + getDescription().getVersion());
-                player.sendMessage("With build number: " + System.getProperty("build.number"));
+                player.sendMessage("With build number: " + atts.getValue("Build-Id"));
                 return true;
             }
         }
@@ -319,7 +320,7 @@ public class CitiTrader extends JavaPlugin {
     URL res = Assert.class.getResource(Assert.class.getSimpleName() + ".class");
     JarURLConnection conn = (JarURLConnection) res.openConnection();
     Manifest mf = conn.getManifest();
-    Attributes atts = mf.getMainAttributes();
+    atts = mf.getMainAttributes();
     for (Object v : atts.values()) {
         System.out.println(v);
     }
