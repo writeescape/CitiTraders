@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.TraderUtils;
-import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
@@ -413,11 +412,12 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                                 store.getInventory().removeItem(isold);
                             }
 
-                            playerInv.addItem(isold);
+                            
                             player.sendMessage(ChatColor.GOLD + isold.getType().name() + "*" + isold.getAmount());
                             player.sendMessage(ChatColor.GOLD + "purchased");
                             player.sendMessage(ChatColor.GOLD + "" + cost);
-
+                            
+                            playerInv.addItem(isold);
                             buildSellWindow(isold, state);
                         } else {
                             if (CitiTrader.economy.depositPlayer(playerName, cost).type != ResponseType.SUCCESS) {
@@ -563,7 +563,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         }
         state.getInventory().setItem(45, new ItemStack(Material.ARROW, 1));
         state.setStatus(Status.AMOUNT_SELECT);
-        System.out.println("ITEM SELECTED");
+        //System.out.println("ITEM SELECTED");
     }
     
     public void buildSalesWindow(TraderStatus state) {
