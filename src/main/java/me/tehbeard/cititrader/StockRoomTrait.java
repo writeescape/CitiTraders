@@ -306,7 +306,8 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                         return;
                     }
                     double price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrice(is);
-                    p.sendMessage("Item costs: " + price);
+                    p.sendMessage("Item costs:");
+                    p.sendMessage("" + price);
                 }
             }
             break;
@@ -330,7 +331,8 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                     //event.setCancelled(true);
                     Player p = (Player) event.getWhoClicked();
                     double price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrice(event.getCurrentItem()) * event.getCurrentItem().getAmount();
-                    p.sendMessage("Stack costs: " + price);
+                    p.sendMessage("Stack costs:");
+                    p.sendMessage("" + price);
                 }
             }
             break;
@@ -344,8 +346,10 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                     //event.setCancelled(true);
                     Player p = (Player) event.getWhoClicked();
                     double price = state.getTrader().getTrait(StockRoomTrait.class).getBuyPrice(event.getCurrentItem());
-                    p.sendMessage("item price: " + price);
-                    p.sendMessage("stack price:" + (price * event.getCurrentItem().getAmount()));
+                    p.sendMessage("item price: ");
+                    p.sendMessage("" + price);
+                    p.sendMessage("stack price:");
+                    p.sendMessage("" + price * event.getCurrentItem().getAmount());
                 }
             }
 
@@ -394,7 +398,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                             }
 
                             playerInv.addItem(isold);
-                            player.sendMessage(ChatColor.GOLD + "Item (" + isold.getType().name() + "*" + isold.getAmount() + ") purchased for " + cost + ".");
+                            player.sendMessage(ChatColor.GOLD + isold.getType().name() + "*" + isold.getAmount());
+                            player.sendMessage(ChatColor.GOLD + "purchased");
+                            player.sendMessage(ChatColor.GOLD + "" + cost);
 
                             buildSellWindow(isold, state);
                         } else {
