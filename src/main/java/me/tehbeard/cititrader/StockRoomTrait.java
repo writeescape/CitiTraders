@@ -228,11 +228,16 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
     public void openSalesWindow(Player player) {
         TraderStatus state = Trader.getStatus(player.getName());
-        state.setTrader(npc);
-        state.setStatus(Status.ITEM_SELECT);
-        state.setInventory(constructViewing());
-        player.openInventory(state.getInventory());
-
+        
+        if (state.getStatus() == Status.ITEM_SELECT || state.getStatus() == Status.AMOUNT_SELECT) {
+            state.setStatus(Status.ITEM_SELECT);
+            buildSalesWindow(state);
+        } else  {
+            state.setTrader(npc);
+            state.setStatus(Status.ITEM_SELECT);
+            state.setInventory(constructViewing());
+            player.openInventory(state.getInventory());
+        }
     }
 
     public void openBuyWindow(Player player) {
@@ -245,10 +250,18 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             state.setInventory(i);
             player.openInventory(i);
 
-        }
+        } 
 
     }
 
+    public void openSalesWindowtest(Player player) {
+        TraderStatus state = Trader.getStatus(player.getName());
+        state.setTrader(npc);
+        if(state.getStatus() == Status.NOT) {
+            Inventory i = constructSellBox();
+            state.setInventory(i);
+        }
+    }
     public void processInventoryClick(InventoryClickEvent event) {
         TraderStatus state = Trader.getStatus(event.getWhoClicked().getName());
 
@@ -270,15 +283,18 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             //state.setStatus(Status.ITEM_SELECT);
             //state.setInventory(constructViewing());
             //((Player)event.getWhoClicked()).openInventory(state.getInventory());
-            ((Player) event.getWhoClicked()).closeInventory();
-            final NPCRightClickEvent npcevent = new NPCRightClickEvent(npc, (Player) event.getWhoClicked());
-            CitiTrader.self.getServer().getScheduler().scheduleSyncDelayedTask(CitiTrader.self, new Runnable() {
-                @Override
-                public void run() {
-                    CitiTrader.self.getServer().getPluginManager().callEvent(npcevent);
-                }
-            }, 10);
+            
+            
+            //((Player) event.getWhoClicked()).closeInventory();
+            //final NPCRightClickEvent npcevent = new NPCRightClickEvent(npc, (Player) event.getWhoClicked());
+            //CitiTrader.self.getServer().getScheduler().scheduleSyncDelayedTask(CitiTrader.self, new Runnable() {
+                //@Override
+                //public void run() {
+                    //CitiTrader.self.getServer().getPluginManager().callEvent(npcevent);
+                //}
+            //}, 10);
             //CitiTrader.self.getServer().getPluginManager().callEvent(npcevent);
+            openSalesWindow((Player) event.getWhoClicked());
             return;
         }
         // Return if no item is selected.
@@ -536,7 +552,6 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         //set up the amount selection
         int k = 0;
         for (int i = 1; i <= 64; i *= 2) {
-            System.out.println(is.getMaxStackSize());
             if (i <= is.getMaxStackSize()) {
                 ItemStack newIs = is.clone();
                 newIs.setAmount(i);
@@ -549,5 +564,23 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         state.getInventory().setItem(45, new ItemStack(Material.ARROW, 1));
         state.setStatus(Status.AMOUNT_SELECT);
         System.out.println("ITEM SELECTED");
+    }
+    
+    public void buildSalesWindow(TraderStatus state) {
+        //clear the inventory
+        for (int i = 0; i < 54; i++) {
+            state.getInventory().setItem(i, null);
+        }
+        
+        for (ItemStack is : stock) {
+            if (is == null) {
+                continue;
+            }
+            ItemStack chk = new ItemStack(is.getType(), 1, is.getDurability());
+            chk.addEnchantments(is.getEnchantments());
+            if (state.getInventory().contains(chk) == false && getSellPrice(is) > 0.0D) {
+                state.getInventory().addItem(chk);
+            }
+        }
     }
 }
