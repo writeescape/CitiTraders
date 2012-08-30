@@ -1,6 +1,8 @@
 package me.tehbeard.cititrader;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.jar.Attributes;
@@ -20,6 +22,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -40,13 +44,13 @@ public class CitiTrader extends JavaPlugin {
     public static Economy economy;
     private static CitizensPlugin citizens;
     private static Attributes atts;
+    private FileConfiguration profiles = null;
+    private File profilesFile = null;
 
     @Override
     public void onEnable() {
-        if (!getConfig().contains("profiles")) {
-            getConfig().options().copyDefaults(true);
-            saveConfig();
-        }
+        setupConfig();
+        this.reloadProfiles();
 
         if (setupEconomy()) {
             self = this;
@@ -66,8 +70,9 @@ public class CitiTrader extends JavaPlugin {
         } catch (IOException e) {
             // Failed to submit the stats :-(
         }
+
         try {
-            testManifest();
+            this.getManifest();
         } catch (IOException ex) {
             Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -154,7 +159,7 @@ public class CitiTrader extends JavaPlugin {
             case sellprice: {
                 if (args.length == 2) {
                     TraderStatus state = Trader.getStatus(((Player) sender).getName());
-                    if(state.getStatus().equals(Status.SET_PRICE_BUY)) {
+                    if (state.getStatus().equals(Status.SET_PRICE_BUY)) {
                         sender.sendMessage(ChatColor.YELLOW + "Please finish setting your buy price first");
                         sender.sendMessage(ChatColor.YELLOW + "Or cancel with /trader cancel");
                         return true;
@@ -170,7 +175,7 @@ public class CitiTrader extends JavaPlugin {
             case buyprice: {
                 if (args.length == 2) {
                     TraderStatus state = Trader.getStatus(((Player) sender).getName());
-                    if(state.getStatus().equals(Status.SET_PRICE_SELL)) {
+                    if (state.getStatus().equals(Status.SET_PRICE_SELL)) {
                         sender.sendMessage(ChatColor.YELLOW + "Please finish setting your sell price first");
                         sender.sendMessage(ChatColor.YELLOW + "Or cancel with /trader cancel");
                         return true;
@@ -253,6 +258,22 @@ public class CitiTrader extends JavaPlugin {
                 player.sendMessage("With build number: " + atts.getValue("Build-Tag"));
                 return true;
             }
+            case reloadprofiles: {
+                this.reloadProfiles();
+                return true;
+            }
+            case disable: {
+                TraderStatus status = Trader.getStatus(player.getName());
+                player.sendMessage("Right click the Trader you want to disable.");
+                status.setStatus(Status.DISABLE);
+                return true;
+            }
+            case enable: {
+                TraderStatus status = Trader.getStatus(player.getName());
+                player.sendMessage("Right click the Trader you want to enable.");
+                status.setStatus(Status.ENABLE);
+                return true;
+            }
         }
 
 
@@ -279,7 +300,10 @@ public class CitiTrader extends JavaPlugin {
         wallet,
         fire,
         cancel,
-        version
+        version,
+        reloadprofiles,
+        disable,
+        enable
     }
 
     private enum Style {
@@ -302,28 +326,64 @@ public class CitiTrader extends JavaPlugin {
     }
 
     public int getTraderLimit(Player player) {
-        int limit = getConfig().getInt("profiles.default.trader-limit");
-        for (String s : getConfig().getConfigurationSection("profiles").getKeys(false)) {
+        int limit = getProfiles().getInt("profiles.default.trader-limit", 1);
+        for (String s : getProfiles().getConfigurationSection("profiles").getKeys(false)) {
             if (s.equals("default")) {
                 continue;
             }
             if (player.hasPermission(PERM_PREFIX + ".profile." + s)) {
-                limit = Math.max(getConfig().getInt("profiles." + s + ".trader-limit"), limit);
+                limit = Math.max(getProfiles().getInt("profiles." + s + ".trader-limit"), limit);
             }
 
         }
 
         return limit;
     }
-    
-    public void testManifest() throws IOException {
-    URL res = Assert.class.getResource(Assert.class.getSimpleName() + ".class");
-    JarURLConnection conn = (JarURLConnection) res.openConnection();
-    Manifest mf = conn.getManifest();
-    atts = mf.getMainAttributes();
-    //for (Object v : atts.values()) {
-        //System.out.println(v);
-    //}
-}
 
+    public void getManifest() throws IOException {
+        URL res = Assert.class.getResource(Assert.class.getSimpleName() + ".class");
+        JarURLConnection conn = (JarURLConnection) res.openConnection();
+        Manifest mf = conn.getManifest();
+        atts = mf.getMainAttributes();
+    }
+
+    public void setupConfig() {
+
+        getConfig();
+        getConfig().options().copyDefaults(true);
+        this.saveConfig();
+    }
+
+    public void reloadProfiles() {
+        profilesFile = new File(this.getDataFolder(), "profiles.yml");
+        profiles = YamlConfiguration.loadConfiguration(profilesFile);
+
+        // Look for defaults in the jar
+        InputStream defConfigStream = this.getResource("profiles.yml");
+
+        if (defConfigStream != null && !profilesFile.exists()) {
+            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+            profiles.setDefaults(defConfig);
+            profiles.options().copyDefaults(true);
+        }
+        this.saveProfiles();
+    }
+
+    public FileConfiguration getProfiles() {
+        if (profiles == null) {
+            this.reloadProfiles();
+        }
+        return profiles;
+    }
+
+    public void saveProfiles() {
+        if (profiles == null || profilesFile == null) {
+            return;
+        }
+        try {
+            getProfiles().save(profilesFile);
+        } catch (IOException ex) {
+            this.getLogger().log(Level.SEVERE, "Could not save config to " + profilesFile, ex);
+        }
+    }
 }

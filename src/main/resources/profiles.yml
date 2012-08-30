@@ -1,0 +1,9 @@
+profiles:
+  default:
+    trader-limit: 1
+  shopkeep:
+    trader-limit: 5
+  businessman:
+    trader-limit: 10
+  ceo:
+    trader-limit: 20

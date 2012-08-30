@@ -32,6 +32,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     boolean enableLeftClick;
     boolean enableRightClick;
     boolean adminShop;
+    boolean disabled;
 
     public StockRoomTrait() {
 
@@ -49,6 +50,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         buyPrices = new HashMap<ItemStack, Double>();
         enableLeftClick = true;
         enableRightClick = true;
+        disabled = false;
     }
 
     @Override
@@ -83,6 +85,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             System.out.println(price);
             buyPrices.put(k, price);
         }
+        
+        //load if disabled or enabled
+        disabled = data.getBoolean("disabled");
 
 
     }
@@ -92,6 +97,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
         data.setBoolean("enableRightClick", enableRightClick);
         data.setBoolean("enableLeftClick", enableLeftClick);
+        data.setBoolean("disabled", disabled);
 
         //save the inventory
         int i = 0;
@@ -188,6 +194,14 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         return checkAmount ? amount <= amountFound : amountFound > 0;
     }
 
+    public void setDisabled(boolean value) {
+        disabled = value;
+    }
+    
+    public boolean getDisabled() {
+        return disabled;
+    }
+    
     public double getSellPrice(ItemStack is) {
         ItemStack i = is.clone();
         i.setAmount(1);

@@ -12,7 +12,8 @@ commands:
           /<command> wallet [give|take] amount  - place/remove money from a private wallet
           /<command> sellprice price - Set selling price for item currently in hand, right click npc to set price for them.
           /<command> buyprice price - Set buying price for item currently in hand, right click npc to set price for them.
-        
+          /<command> cancel - Cancels all traders status with player
+          /<command> reloadprofiles - reload all profiles
 permissions:
   traders.command.*:
     description: Grants access to all trader commands
@@ -22,6 +23,14 @@ permissions:
       traders.command.sellprice: true
       traders.command.buyprice: true
       traders.command.fire: true
+      traders.command.cancel: true
+      traders.command.reloadprofiles: true
+  traders.command.cancel:
+    description: Can use cancel command
+    default: true
+  traders.command.reloadprofiles:
+    description: Can reload profiles
+    default: op
   traders.command.create:
     description: Can create traders using /trader create
     default: op

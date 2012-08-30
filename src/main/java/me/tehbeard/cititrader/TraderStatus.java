@@ -17,7 +17,9 @@ public class TraderStatus {
         SELL_BOX,
         GIVE_MONEY,
         TAKE_MONEY,
-        FIRING
+        FIRING,
+        DISABLE,
+        ENABLE
         
         
     }
