@@ -29,7 +29,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.MetricsLite;
 
 /**
  * Provides a trader for
@@ -46,6 +45,7 @@ public class CitiTrader extends JavaPlugin {
     private static Attributes atts;
     private FileConfiguration profiles = null;
     private File profilesFile = null;
+    public static int totalTraders = 0;
 
     @Override
     public void onEnable() {
@@ -62,13 +62,6 @@ public class CitiTrader extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(new Trader(), this);
         } else {
             getLogger().severe("COULD NOT FIND AN ECONOMY PLUGIN");
-        }
-
-        try {
-            MetricsLite metrics = new MetricsLite(this);
-            metrics.start();
-        } catch (IOException e) {
-            // Failed to submit the stats :-(
         }
 
         try {

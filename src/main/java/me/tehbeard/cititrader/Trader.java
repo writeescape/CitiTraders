@@ -1,56 +1,74 @@
 package me.tehbeard.cititrader;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
-
+import net.citizensnpcs.api.event.CitizensEnableEvent;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Owner;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.mcstats.Metrics;
+import org.mcstats.Metrics.Graph;
 
 /**
  * @author James
  *
  */
 public class Trader implements Listener {
-    
+
     private static Map<String, TraderStatus> status;
-    
+
     public static TraderStatus getStatus(String player) {
         if (!status.containsKey(player)) {
             status.put(player, new TraderStatus());
         }
         return status.get(player);
-        
+
     }
-    
+
     public static void clearStatus(String player) {
         status.remove(player);
-        
+
     }
-    
+
     public Trader() {
         status = new HashMap<String, TraderStatus>();
     }
-    
+
+    @EventHandler
+    public void onCitizensLoad(CitizensEnableEvent event) {
+        try {
+            Metrics metrics = new Metrics(CitiTrader.self);
+            Graph graph = metrics.createGraph("Traders");
+            graph.addPlotter(new Metrics.Plotter("Total Traders") {
+                @Override
+                public int getValue() {
+                    return CitiTrader.totalTraders;
+                }
+            });
+            metrics.start();
+            CitiTrader.self.getLogger().info("Metrics Started.");
+        } catch (IOException e) {
+            // Failed to submit the stats :-(
+        }
+    }
+
     @EventHandler
     public void onLeftClick(NPCLeftClickEvent event) {
         NPC npc = event.getNPC();
         Player by = event.getClicker();
-        
+
         if (!npc.hasTrait(StockRoomTrait.class)) {
             return;
         }
@@ -59,9 +77,9 @@ public class Trader implements Listener {
         } else {
             by.sendMessage(ChatColor.DARK_PURPLE + "This trader is currently disabled.");
         }
-        
+
     }
-    
+
     @EventHandler
     public void onRightClick(NPCRightClickEvent event) {
         NPC npc = event.getNPC();
@@ -69,14 +87,14 @@ public class Trader implements Listener {
         if (!npc.hasTrait(StockRoomTrait.class)) {
             return;
         }
-        
+
         if (!npc.getTrait(StockRoomTrait.class).isEnableRightClick()) {
             return;
         }
         TraderStatus state = getStatus(by.getName());
         state.setTrader(npc);
         String owner = npc.getTrait(Owner.class).getOwner();
-        
+
         if (by.getName().equalsIgnoreCase(owner) || by.getName().equalsIgnoreCase(npc.getName())) {
             switch (state.getStatus()) {
                 case DISABLE:
@@ -92,7 +110,7 @@ public class Trader implements Listener {
             }
         }
         if (by.getName().equalsIgnoreCase(owner)) {
-            
+
             switch (state.getStatus()) {
                 case FIRING: {
                     if (!state.getTrader().getTrait(StockRoomTrait.class).isStockRoomEmpty()) {
@@ -105,7 +123,7 @@ public class Trader implements Listener {
                         clearStatus(by.getName());
                         return;
                     }
-                    
+
                     by.sendMessage("Firing trader!");
                     npc.removeTrait(StockRoomTrait.class);
                     npc.removeTrait(WalletTrait.class);
@@ -117,14 +135,14 @@ public class Trader implements Listener {
                     by.sendMessage("Sell Price set");
                     return;
                 }
-                
+
                 case SET_PRICE_BUY: {
                     state.getTrader().getTrait(StockRoomTrait.class).setBuyPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
                     by.sendMessage("Buy Price set");
                     return;
                 }
-                
+
                 case SET_WALLET: {
                     state.getTrader().getTrait(WalletTrait.class).setAccount(state.getAccName());
                     state.getTrader().getTrait(WalletTrait.class).setType(state.getWalletType());
@@ -132,7 +150,7 @@ public class Trader implements Listener {
                     by.sendMessage("Wallet information set");
                     return;
                 }
-                
+
                 case GIVE_MONEY: {
                     if (state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE) {
                         by.sendMessage(ChatColor.RED + "Cannot use give/take on traders who use economy backed accounts.");
@@ -155,13 +173,13 @@ public class Trader implements Listener {
                     return;
                 }
                 case TAKE_MONEY:
-                    
+
                     if (state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE) {
                         by.sendMessage(ChatColor.RED + "Cannot use give/take on traders who use economy backed accounts.");
                         return;
                     }
                     WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
-                    
+
                     if (!wallet.has(state.getMoney())) {
                         by.sendMessage(ChatColor.RED + "Not enough funds.");
                         return;
@@ -179,13 +197,13 @@ public class Trader implements Listener {
                     status.remove(by.getName());
                     return;
             }
-            
+
         }
-        
-        
+
+
         if (by.getName().equalsIgnoreCase(owner) && by.getItemInHand().getType() == Material.BOOK) {
             npc.getTrait(StockRoomTrait.class).openStockRoom(by);
-            
+
         } else {
             if (!npc.getTrait(StockRoomTrait.class).getDisabled()) {
                 npc.getTrait(StockRoomTrait.class).openSalesWindow(by);
@@ -194,23 +212,23 @@ public class Trader implements Listener {
             }
         }
     }
-    
+
     public static void setUpNPC(NPC npc) {
         if (!npc.hasTrait(StockRoomTrait.class)) {
             npc.addTrait(StockRoomTrait.class);
-            
+
         }
-        
+
         if (!npc.hasTrait(WalletTrait.class)) {
             npc.addTrait(WalletTrait.class);
-            
+
         }
     }
-    
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void inventoryClick(InventoryClickEvent event) {
         TraderStatus state = getStatus(event.getWhoClicked().getName());
-        
+
         if (state.getStatus() != Status.NOT) {
             state.getTrader().getTrait(StockRoomTrait.class).processInventoryClick(event);
         }

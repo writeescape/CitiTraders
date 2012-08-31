@@ -54,8 +54,13 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     }
 
     @Override
+    public void onRemove() {
+        CitiTrader.totalTraders--;
+    }
+    @Override
     public void load(DataKey data) throws NPCLoadException {
-
+        CitiTrader.totalTraders++;
+        System.out.println("Loading Trader " + CitiTrader.totalTraders);
         enableLeftClick = data.getBoolean("enableLeftClick");
         enableRightClick = data.getBoolean("enableRightClick");
 
