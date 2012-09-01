@@ -62,7 +62,7 @@ public class Trader implements Listener {
                             totaltrader++;
                         }
                     }
-                    System.out.println("Traders: " + totaltrader);
+                    CitiTrader.self.getLogger().info("Traders: " + totaltrader);
                     return totaltrader;
                 }
             });
