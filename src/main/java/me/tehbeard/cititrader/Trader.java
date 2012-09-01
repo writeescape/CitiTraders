@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
+import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.CitizensEnableEvent;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
@@ -54,7 +55,15 @@ public class Trader implements Listener {
             graph.addPlotter(new Metrics.Plotter("Total Traders") {
                 @Override
                 public int getValue() {
-                    return CitiTrader.totalTraders;
+                    Integer totaltrader = 0;
+                    while (CitizensAPI.getNPCRegistry().iterator().hasNext()) {
+                        NPC npcount = CitizensAPI.getNPCRegistry().iterator().next();
+                        if (npcount.hasTrait(StockRoomTrait.class)) {
+                            totaltrader++;
+                        }
+                    }
+                    System.out.println("Traders: " + totaltrader);
+                    return totaltrader;
                 }
             });
             metrics.start();
