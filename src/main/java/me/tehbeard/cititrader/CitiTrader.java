@@ -45,7 +45,6 @@ public class CitiTrader extends JavaPlugin {
     private static Attributes atts;
     private FileConfiguration profiles = null;
     private File profilesFile = null;
-    public static int totalTraders = 0;
 
     @Override
     public void onEnable() {

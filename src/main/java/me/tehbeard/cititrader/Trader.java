@@ -2,6 +2,7 @@ package me.tehbeard.cititrader;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
@@ -55,12 +56,19 @@ public class Trader implements Listener {
             graph.addPlotter(new Metrics.Plotter("Total Traders") {
                 @Override
                 public int getValue() {
+                    
                     Integer totaltrader = 0;
-                    while (CitizensAPI.getNPCRegistry().iterator().hasNext()) {
-                        NPC npcount = CitizensAPI.getNPCRegistry().iterator().next();
+                    try {
+                        Iterator it = CitizensAPI.getNPCRegistry().iterator();
+                    while (it.hasNext()) {
+                        NPC npcount = (NPC) it.next();
                         if (npcount.hasTrait(StockRoomTrait.class)) {
                             totaltrader++;
                         }
+                    }
+                    } catch (Exception e) {
+                        System.out.println("error");
+                        e.printStackTrace();
                     }
                     CitiTrader.self.getLogger().info("Traders: " + totaltrader);
                     return totaltrader;
