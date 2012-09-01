@@ -69,7 +69,8 @@ public class Trader implements Listener {
             metrics.start();
             CitiTrader.self.getLogger().info("Metrics Started.");
         } catch (IOException e) {
-            // Failed to submit the stats :-(
+            CitiTrader.self.getLogger().info("Failed:");
+            e.printStackTrace();
         }
     }
 
