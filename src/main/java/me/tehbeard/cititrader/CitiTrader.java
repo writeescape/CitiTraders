@@ -210,7 +210,7 @@ public class CitiTrader extends JavaPlugin {
 
                 state.setStatus(Status.SET_WALLET);
                 state.setWalletType(type);
-
+                sender.sendMessage(ChatColor.DARK_PURPLE + "Right click trader to set his wallet!");
 
                 return true;
             }
