@@ -289,7 +289,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         }
 
 
-        if (event.getRawSlot() == 45) {
+        if (event.getRawSlot() == 45 && state.getStatus() == Status.AMOUNT_SELECT) {
             //openSalesWindow((Player) event.getWhoClicked());
 
             //state.setStatus(Status.ITEM_SELECT);
