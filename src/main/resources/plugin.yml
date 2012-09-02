@@ -4,6 +4,7 @@ version: RC-3
 depend: [Citizens,Vault]
 commands:
     trader:
+        aliases: ctrader
         description: CitiTrader commands 
         usage: |
           /<command> create name -type [TYPE] - Create a trader at the players current location
