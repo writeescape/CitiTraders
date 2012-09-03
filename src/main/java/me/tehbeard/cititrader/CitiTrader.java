@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,9 +15,11 @@ import junit.framework.Assert;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.ArgumentPack;
+import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.CitizensPlugin;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.TraitInfo;
+import net.citizensnpcs.api.trait.trait.MobType;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -139,11 +143,13 @@ public class CitiTrader extends JavaPlugin {
 
 
                 //, character);
-                NPC npc = citizens.getNPCRegistry().createNPC(npcType, npcName);
-                Trader.setUpNPC(npc);
-
+                NPC npc = CitizensAPI.getNPCRegistry().createNPC(npcType, npcName);
+                
+                npc.getTrait(MobType.class).setType(npcType);
                 npc.getTrait(Owner.class).setOwner(player.getName());
+
                 npc.spawn(player.getLocation());
+                Trader.setUpNPC(npc);
 
                 return true;
 
@@ -336,6 +342,8 @@ public class CitiTrader extends JavaPlugin {
         URL res = Assert.class.getResource(Assert.class.getSimpleName() + ".class");
         JarURLConnection conn = (JarURLConnection) res.openConnection();
         Manifest mf = conn.getManifest();
+        //JarInputStream jarStream = new JarInputStream(this.getResource("CitiTrader.class"));
+        //Manifest mf = jarStream.getManifest();
         atts = mf.getMainAttributes();
     }
 
