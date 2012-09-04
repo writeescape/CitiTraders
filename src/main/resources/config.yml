@@ -9,3 +9,6 @@ trader-types:
 - WOLF
 - IRON_GOLEM
 - VILLAGER
+debug:
+  tradercount: false
+  versioncheck: true

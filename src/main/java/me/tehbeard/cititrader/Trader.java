@@ -71,7 +71,9 @@ public class Trader implements Listener {
                         System.out.println("error");
                         e.printStackTrace();
                     }
-                    CitiTrader.self.getLogger().info("Traders: " + totaltrader);
+                    if(CitiTrader.self.getConfig().getBoolean("debug.tradercount", false)) {
+                        CitiTrader.self.getLogger().info("Traders: " + totaltrader);
+                    }
                     return totaltrader;
                 }
             });
@@ -82,7 +84,9 @@ public class Trader implements Listener {
             e.printStackTrace();
         }
         
-        CitiTrader.self.checkVersion();
+        if(CitiTrader.self.getConfig().getBoolean("debug.versioncheck", true)) {
+            CitiTrader.self.checkVersion();
+        }
     }
 
     @EventHandler

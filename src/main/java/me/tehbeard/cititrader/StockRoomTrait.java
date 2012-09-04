@@ -69,21 +69,21 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
         //load selling prices
         for (DataKey priceKey : data.getRelative("prices").getIntegerSubKeys()) {
-            System.out.println("price listing found");
+            //System.out.println("price listing found");
             ItemStack k = ItemStorage.loadItemStack(priceKey.getRelative("item"));
-            System.out.println(k);
+            //System.out.println(k);
             double price = priceKey.getDouble("price");
-            System.out.println(price);
+            //System.out.println(price);
             sellPrices.put(k, price);
         }
 
         //load buy prices
         for (DataKey priceKey : data.getRelative("buyprices").getIntegerSubKeys()) {
-            System.out.println("price listing found");
+            //System.out.println("price listing found");
             ItemStack k = ItemStorage.loadItemStack(priceKey.getRelative("item"));
-            System.out.println(k);
+            //System.out.println(k);
             double price = priceKey.getDouble("price");
-            System.out.println(price);
+            //System.out.println(price);
             buyPrices.put(k, price);
         }
 
