@@ -19,7 +19,9 @@ public class TraderStatus {
         TAKE_MONEY,
         FIRING,
         DISABLE,
-        ENABLE
+        ENABLE,
+        SET_LINK,
+        REMOVE_LINK
         
         
     }
@@ -30,7 +32,8 @@ public class TraderStatus {
     private Inventory tempInv;
     private WalletType walletType;
     private String accName;
-    
+    private int linkedNPCID;
+    private String linkedNPCName;
     
     
     public String getAccName() {
@@ -83,5 +86,21 @@ public class TraderStatus {
 
     public void setInventory(Inventory inventory) {
         this.inventory = inventory;
+    }
+    
+    public void setLinkedNPC(int value) {
+        linkedNPCID = value;
+    }
+    
+    public int getLinkedNPCID() {
+        return linkedNPCID;
+    }
+    
+    public void setLinkedNPC(String value) {
+        linkedNPCName = value;
+    }
+    
+    public String getLinkedNPCName() {
+        return linkedNPCName;
     }
 }

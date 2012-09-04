@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.TraderUtils;
+import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
@@ -31,8 +32,8 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     Map<ItemStack, Double> buyPrices;
     boolean enableLeftClick;
     boolean enableRightClick;
-    boolean adminShop;
     boolean disabled;
+    int linkedNPCID;
 
     public StockRoomTrait() {
 
@@ -51,6 +52,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         enableLeftClick = true;
         enableRightClick = true;
         disabled = false;
+        linkedNPCID = -1;
     }
 
     @Override
@@ -84,10 +86,12 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             System.out.println(price);
             buyPrices.put(k, price);
         }
-        
+
         //load if disabled or enabled
         disabled = data.getBoolean("disabled");
 
+        //load if Trader is linked to another NPC
+        linkedNPCID = data.getInt("linkedNPCID", -1);
 
     }
 
@@ -97,6 +101,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         data.setBoolean("enableRightClick", enableRightClick);
         data.setBoolean("enableLeftClick", enableLeftClick);
         data.setBoolean("disabled", disabled);
+        data.setInt("linkedNPCID", linkedNPCID);
 
         //save the inventory
         int i = 0;
@@ -108,7 +113,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             }
         }
 
+        data.removeKey("prices");
         DataKey sellPriceIndex = data.getRelative("prices");
+ 
         i = 0;
         for (Entry<ItemStack, Double> price : sellPrices.entrySet()) {
             if (price.getValue() > 0.0D) {
@@ -118,7 +125,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         }
 
 
-
+        data.removeKey("buyprices");
         DataKey buyPriceIndex = data.getRelative("buyprices");
         i = 0;
         for (Entry<ItemStack, Double> price : buyPrices.entrySet()) {
@@ -156,12 +163,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         }
 
         return display;
-
-
     }
 
     private Inventory constructSellBox() {
-
 
         Inventory display = Bukkit.createInventory(null, 36, "Selling");
         return display;
@@ -193,24 +197,85 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         return checkAmount ? amount <= amountFound : amountFound > 0;
     }
 
+    public boolean setLinkedNPC(String name) {
+        Iterator<NPC> it = CitizensAPI.getNPCRegistry().iterator();
+        while (it.hasNext()) {
+            NPC linkedNPC = it.next();
+            if (linkedNPC.getName().equals(name)) {
+                if (linkedNPC.hasTrait(StockRoomTrait.class)) {
+                    if(linkedNPC.getTrait(StockRoomTrait.class).getLinkedNPC().getId() == npc.getId()) {
+                        return false;
+                    } else {
+                        linkedNPCID = linkedNPC.getId();
+                    }
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean removeLinkedNPC() {
+        linkedNPCID = -1;
+        return true;
+    }
+
+    public boolean isLinkedNPC() {
+        if (linkedNPCID > -1) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public NPC getLinkedNPC() {
+        NPC linkedNPC = CitizensAPI.getNPCRegistry().getById(linkedNPCID);
+        if(linkedNPC != null) {
+            if (linkedNPC.hasTrait(StockRoomTrait.class)) {
+                return linkedNPC;
+            }
+        }
+        return null;
+    }
+
     public void setDisabled(boolean value) {
         disabled = value;
     }
-    
+
     public boolean getDisabled() {
         return disabled;
     }
-    
+
     public double getSellPrice(ItemStack is) {
         ItemStack i = is.clone();
         i.setAmount(1);
+        if(isLinkedNPC()) {
+            NPC linkedNPC = getLinkedNPC();
+            if(linkedNPC != null) {
+                return linkedNPC.getTrait(StockRoomTrait.class).getSellPrices().containsKey(i) ? linkedNPC.getTrait(StockRoomTrait.class).getSellPrices().get(i) : 0;
+            }
+        }
         return sellPrices.containsKey(i) ? sellPrices.get(i) : 0;
 
+    }
+    
+    public Map<ItemStack, Double> getSellPrices() {
+        return sellPrices;
     }
 
     public void setSellPrice(ItemStack is, double price) {
         ItemStack i = is.clone();
         i.setAmount(1);
+        if(price == -1) {
+            if(sellPrices.containsKey(i)) {
+                sellPrices.remove(i);
+            } else {
+                System.out.println("Item not found!");
+            }
+            return;
+        }
+        
         sellPrices.put(i, price);
 
     }
@@ -218,15 +283,28 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     public double getBuyPrice(ItemStack is) {
         ItemStack i = is.clone();
         i.setAmount(1);
+        if(isLinkedNPC()) {
+            NPC linkedNPC = CitizensAPI.getNPCRegistry().getById(linkedNPCID);
+            return linkedNPC.getTrait(StockRoomTrait.class).getBuyPrices().containsKey(i) ? linkedNPC.getTrait(StockRoomTrait.class).getBuyPrices().get(i) : 0;
+        }
         return buyPrices.containsKey(i) ? buyPrices.get(i) : 0;
 
+    }
+    
+    public Map<ItemStack, Double> getBuyPrices() {
+        return buyPrices;
     }
 
     public void setBuyPrice(ItemStack is, double price) {
         ItemStack i = is.clone();
         i.setAmount(1);
+        if(price == -1) {
+            if(buyPrices.containsKey(i)) {
+                buyPrices.remove(i);
+            }
+            return;
+        }
         buyPrices.put(i, price);
-
     }
 
     public void openStockRoom(Player player) {
@@ -240,11 +318,11 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
     public void openSalesWindow(Player player) {
         TraderStatus state = Trader.getStatus(player.getName());
-        
+
         if (state.getStatus() == Status.ITEM_SELECT || state.getStatus() == Status.AMOUNT_SELECT) {
             state.setStatus(Status.ITEM_SELECT);
             buildSalesWindow(state);
-        } else  {
+        } else {
             state.setTrader(npc);
             state.setStatus(Status.ITEM_SELECT);
             state.setInventory(constructViewing());
@@ -262,18 +340,19 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             state.setInventory(i);
             player.openInventory(i);
 
-        } 
+        }
 
     }
 
     public void openSalesWindowtest(Player player) {
         TraderStatus state = Trader.getStatus(player.getName());
         state.setTrader(npc);
-        if(state.getStatus() == Status.NOT) {
+        if (state.getStatus() == Status.NOT) {
             Inventory i = constructSellBox();
             state.setInventory(i);
         }
     }
+
     public void processInventoryClick(InventoryClickEvent event) {
         TraderStatus state = Trader.getStatus(event.getWhoClicked().getName());
 
@@ -290,22 +369,6 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
 
         if (event.getRawSlot() == 45 && state.getStatus() == Status.AMOUNT_SELECT) {
-            //openSalesWindow((Player) event.getWhoClicked());
-
-            //state.setStatus(Status.ITEM_SELECT);
-            //state.setInventory(constructViewing());
-            //((Player)event.getWhoClicked()).openInventory(state.getInventory());
-            
-            
-            //((Player) event.getWhoClicked()).closeInventory();
-            //final NPCRightClickEvent npcevent = new NPCRightClickEvent(npc, (Player) event.getWhoClicked());
-            //CitiTrader.self.getServer().getScheduler().scheduleSyncDelayedTask(CitiTrader.self, new Runnable() {
-                //@Override
-                //public void run() {
-                    //CitiTrader.self.getServer().getPluginManager().callEvent(npcevent);
-                //}
-            //}, 10);
-            //CitiTrader.self.getServer().getPluginManager().callEvent(npcevent);
             openSalesWindow((Player) event.getWhoClicked());
             return;
         }
@@ -345,18 +408,11 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                 if (!TraderUtils.isTopInventory(event)) {
                     break;
                 }
-                //if (event.isShiftClick()) {
-                //event.setCancelled(true);
-                //}
                 if (event.isLeftClick()) {
-                    //event.setCancelled(true);
                     System.out.println("AMOUNT SELECTED");
                     Player player = (Player) event.getWhoClicked();
                     sellToPlayer(player, state.getTrader(), event.getCurrentItem());
-                    //event.setCurrentItem(new ItemStack(Material.AIR, 0));
-                    //event.setCursor(new ItemStack(Material.AIR, 0));
                 } else {
-                    //event.setCancelled(true);
                     Player p = (Player) event.getWhoClicked();
                     double price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrice(event.getCurrentItem()) * event.getCurrentItem().getAmount();
                     p.sendMessage("Stack costs:");
@@ -371,13 +427,17 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                 }
 
                 if (event.isShiftClick()) {
-                    //event.setCancelled(true);
+                    event.setCancelled(true);
+                    return;
+                }
+                if (event.isRightClick()) {
                     Player p = (Player) event.getWhoClicked();
                     double price = state.getTrader().getTrait(StockRoomTrait.class).getBuyPrice(event.getCurrentItem());
-                    p.sendMessage("item price: ");
-                    p.sendMessage("" + price);
-                    p.sendMessage("stack price:");
-                    p.sendMessage("" + price * event.getCurrentItem().getAmount());
+                    p.sendMessage(ChatColor.GOLD + "Item price: ");
+                    p.sendMessage(ChatColor.GOLD + "" + price);
+                    p.sendMessage(ChatColor.GOLD + "Stack price:");
+                    p.sendMessage(ChatColor.GOLD + "" + price * event.getCurrentItem().getAmount());
+                    event.setCancelled(true);
                 }
             }
 
@@ -425,11 +485,11 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                                 store.getInventory().removeItem(isold);
                             }
 
-                            
+
                             player.sendMessage(ChatColor.GOLD + isold.getType().name() + "*" + isold.getAmount());
                             player.sendMessage(ChatColor.GOLD + "purchased");
                             player.sendMessage(ChatColor.GOLD + "" + cost);
-                            
+
                             playerInv.addItem(isold);
                             buildSellWindow(isold, state);
                         } else {
@@ -578,13 +638,13 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         state.setStatus(Status.AMOUNT_SELECT);
         //System.out.println("ITEM SELECTED");
     }
-    
+
     public void buildSalesWindow(TraderStatus state) {
         //clear the inventory
         for (int i = 0; i < 54; i++) {
             state.getInventory().setItem(i, null);
         }
-        
+
         for (ItemStack is : stock) {
             if (is == null) {
                 continue;

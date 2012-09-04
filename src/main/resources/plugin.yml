@@ -1,6 +1,6 @@
 name: CitiTrader
 main:  me.tehbeard.cititrader.CitiTrader
-version: RC-3
+version: RC-4
 depend: [Citizens,Vault]
 commands:
     trader:

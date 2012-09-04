@@ -20,6 +20,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
 
@@ -80,6 +81,8 @@ public class Trader implements Listener {
             CitiTrader.self.getLogger().info("Failed:");
             e.printStackTrace();
         }
+        
+        CitiTrader.self.checkVersion();
     }
 
     @EventHandler
@@ -132,17 +135,17 @@ public class Trader implements Listener {
             switch (state.getStatus()) {
                 case FIRING: {
                     if (!state.getTrader().getTrait(StockRoomTrait.class).isStockRoomEmpty()) {
-                        by.sendMessage("Cannot fire trader! He still has items on him!");
+                        by.sendMessage(ChatColor.RED + "Cannot fire trader! He still has items on him!");
                         clearStatus(by.getName());
                         return;
                     }
                     if (state.getTrader().getTrait(WalletTrait.class).getType() == WalletType.PRIVATE && state.getTrader().getTrait(WalletTrait.class).getAmount() > 0.0D) {
-                        by.sendMessage("Trader still has money in their wallet!");
+                        by.sendMessage(ChatColor.RED + "Trader still has money in their wallet!");
                         clearStatus(by.getName());
                         return;
                     }
 
-                    by.sendMessage("Firing trader!");
+                    by.sendMessage(ChatColor.DARK_RED + "Firing trader!");
                     npc.removeTrait(StockRoomTrait.class);
                     npc.removeTrait(WalletTrait.class);
                     npc.destroy();
@@ -150,14 +153,22 @@ public class Trader implements Listener {
                 case SET_PRICE_SELL: {
                     state.getTrader().getTrait(StockRoomTrait.class).setSellPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
-                    by.sendMessage("Sell Price set");
+                    if(state.getMoney() == -1) {
+                        by.sendMessage(ChatColor.GREEN + "Item price removed.");
+                    } else {
+                        by.sendMessage(ChatColor.GREEN + "Sell price set.");
+                    }
                     return;
                 }
 
                 case SET_PRICE_BUY: {
                     state.getTrader().getTrait(StockRoomTrait.class).setBuyPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
-                    by.sendMessage("Buy Price set");
+                    if(state.getMoney() == -1) {
+                        by.sendMessage(ChatColor.GREEN + "Item price removed.");
+                    } else {
+                        by.sendMessage(ChatColor.GREEN + "Buy price set.");
+                    }
                     return;
                 }
 
@@ -165,7 +176,7 @@ public class Trader implements Listener {
                     state.getTrader().getTrait(WalletTrait.class).setAccount(state.getAccName());
                     state.getTrader().getTrait(WalletTrait.class).setType(state.getWalletType());
                     state.setStatus(Status.NOT);
-                    by.sendMessage("Wallet information set");
+                    by.sendMessage(ChatColor.GREEN + "Wallet information set");
                     return;
                 }
 
@@ -190,7 +201,7 @@ public class Trader implements Listener {
                     status.remove(by.getName());
                     return;
                 }
-                case TAKE_MONEY:
+                case TAKE_MONEY: {
 
                     if (state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE) {
                         by.sendMessage(ChatColor.RED + "Cannot use give/take on traders who use economy backed accounts.");
@@ -213,6 +224,27 @@ public class Trader implements Listener {
                     }
                     by.sendMessage(ChatColor.GREEN + "Money given");
                     status.remove(by.getName());
+                    return;
+                }
+                case SET_LINK: {
+                    if(!state.getTrader().getTrait(StockRoomTrait.class).setLinkedNPC(state.getLinkedNPCName())) {
+                        by.sendMessage("Trader could not be linked to " + state.getLinkedNPCName());
+                        state.setStatus(Status.NOT);
+                        return;
+                    }
+                    
+                    by.sendMessage("Trader linked to " + state.getLinkedNPCName());
+                    state.setStatus(Status.NOT);
+                    return;
+                }
+                case REMOVE_LINK:
+                    if(!state.getTrader().getTrait(StockRoomTrait.class).removeLinkedNPC()) {
+                        by.sendMessage("Trader could not be unlinked.");
+                        state.setStatus(Status.NOT);
+                        return;
+                    }
+                    by.sendMessage("Trader has been unlinked, he will use is own pricelist now.");
+                    state.setStatus(Status.NOT);
                     return;
             }
 
@@ -261,6 +293,13 @@ public class Trader implements Listener {
         TraderStatus state = getStatus(event.getPlayer().getName());
         if (state.getStatus() != Status.NOT) {
             state.getTrader().getTrait(StockRoomTrait.class).processInventoryClose(event);
+        }
+    }
+    
+    @EventHandler
+    public void onPlayerLogin(PlayerJoinEvent event) {
+        if(event.getPlayer().isOp() && CitiTrader.outdated) {
+            event.getPlayer().sendMessage(ChatColor.GOLD + "Your version of Cititraders(" + CitiTrader.self.getDescription().getVersion() + ") is outdated, please update.");
         }
     }
 }

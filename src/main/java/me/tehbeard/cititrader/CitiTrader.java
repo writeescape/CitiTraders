@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Scanner;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
@@ -43,8 +45,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CitiTrader extends JavaPlugin {
 
     public static final String PERM_PREFIX = "traders";
-    public static Plugin self;
+    public static CitiTrader self;
     public static Economy economy;
+    public static boolean outdated = false;
     private static CitizensPlugin citizens;
     private static Attributes atts;
     private FileConfiguration profiles = null;
@@ -144,7 +147,7 @@ public class CitiTrader extends JavaPlugin {
 
                 //, character);
                 NPC npc = CitizensAPI.getNPCRegistry().createNPC(npcType, npcName);
-                
+
                 npc.getTrait(MobType.class).setType(npcType);
                 npc.getTrait(Owner.class).setOwner(player.getName());
 
@@ -163,7 +166,14 @@ public class CitiTrader extends JavaPlugin {
                         return true;
                     }
                     state.setStatus(Status.SET_PRICE_SELL);
-                    double price = Double.parseDouble(args[1]);
+
+                    double price;
+                    if (args[1].equalsIgnoreCase("remove")) {
+                        price = -1;
+                    } else {
+                        price = Double.parseDouble(args[1]);
+                    }
+
                     state.setMoney(price);
                     sender.sendMessage(ChatColor.DARK_PURPLE + "Now right click with item to finish.");
                 }
@@ -179,7 +189,13 @@ public class CitiTrader extends JavaPlugin {
                         return true;
                     }
                     state.setStatus(Status.SET_PRICE_BUY);
-                    double price = Double.parseDouble(args[1]);
+
+                    double price;
+                    if (args[1].equalsIgnoreCase("remove")) {
+                        price = -1;
+                    } else {
+                        price = Double.parseDouble(args[1]);
+                    }
                     state.setMoney(price);
                     sender.sendMessage(ChatColor.DARK_PURPLE + "Now right click with item to finish.");
                 }
@@ -223,7 +239,7 @@ public class CitiTrader extends JavaPlugin {
 
             case wallet: {
                 if (args.length < 3) {
-                    sender.sendMessage(ChatColor.RED + "transaction type and amount needed");
+                    sender.sendMessage(ChatColor.RED + "Transaction type and amount needed.");
                     return true;
                 }
 
@@ -231,24 +247,26 @@ public class CitiTrader extends JavaPlugin {
                     TraderStatus status = Trader.getStatus(player.getName());
                     status.setStatus(Status.GIVE_MONEY);
                     status.setMoney(Double.parseDouble(args[2]));
+                    player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you would like to give money too.");
                 }
 
                 if (args[1].equalsIgnoreCase("take")) {
                     TraderStatus status = Trader.getStatus(player.getName());
                     status.setStatus(Status.TAKE_MONEY);
                     status.setMoney(Double.parseDouble(args[2]));
+                    player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you would like to take money from.");
                 }
                 return true;
             }
             case fire: {
                 TraderStatus status = Trader.getStatus(player.getName());
                 status.setStatus(Status.FIRING);
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you want to fire.");
                 return true;
             }
             case cancel: {
-                TraderStatus status = Trader.getStatus(player.getName());
                 Trader.clearStatus(player.getName());
-                player.sendMessage("Status reset.");
+                player.sendMessage(ChatColor.GREEN + "Status reset.");
                 return true;
             }
             case version: {
@@ -262,14 +280,32 @@ public class CitiTrader extends JavaPlugin {
             }
             case disable: {
                 TraderStatus status = Trader.getStatus(player.getName());
-                player.sendMessage("Right click the Trader you want to disable.");
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you want to disable.");
                 status.setStatus(Status.DISABLE);
                 return true;
             }
             case enable: {
                 TraderStatus status = Trader.getStatus(player.getName());
-                player.sendMessage("Right click the Trader you want to enable.");
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you want to enable.");
                 status.setStatus(Status.ENABLE);
+                return true;
+            }
+
+            case link: {
+                if (args.length < 2) {
+                    player.sendMessage(ChatColor.YELLOW + "You need to name a trader to link too.");
+                    return true;
+                }
+                TraderStatus status = Trader.getStatus(player.getName());
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you want to link to " + args[1]);
+                status.setLinkedNPC(args[1]);
+                status.setStatus(Status.SET_LINK);
+                return true;
+            }
+            case removelink: {
+                TraderStatus status = Trader.getStatus(player.getName());
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you want to remove the link from.");
+                status.setStatus(Status.REMOVE_LINK);
                 return true;
             }
         }
@@ -301,7 +337,9 @@ public class CitiTrader extends JavaPlugin {
         version,
         reloadprofiles,
         disable,
-        enable
+        enable,
+        link,
+        removelink;
     }
 
     private enum Style {
@@ -384,6 +422,40 @@ public class CitiTrader extends JavaPlugin {
             getProfiles().save(profilesFile);
         } catch (IOException ex) {
             this.getLogger().log(Level.SEVERE, "Could not save config to " + profilesFile, ex);
+        }
+    }
+
+    public void checkVersion() {
+        InputStream is = null;
+        String returnString = "";
+        try {
+            URL url = new URL("http://thedemgel.com/files/public-docs/CitiTraders/version.txt");
+            is = url.openStream();
+            Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");
+            if (scanner.hasNext()) {
+                returnString = scanner.next();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+                Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        returnString = returnString.trim();
+        if (!returnString.equals(this.getDescription().getVersion())) {
+            String warning = String.format("%-9s %-12s %32s", "|", this.getDescription().getVersion(), "|");
+            String newversion = String.format("%-9s %-12s %32s", "|", returnString, "|");
+            getLogger().warning("*-----------------------------------------------------*");
+            getLogger().warning("|    CitiTraders                                      |");
+            getLogger().warning("|      Version is outofdate:                          |");
+            getLogger().warning(warning);
+            getLogger().warning("|      New Version is:                                |");
+            getLogger().warning(newversion);
+            getLogger().warning("*-----------------------------------------------------*");
+            outdated = true;
         }
     }
 }
