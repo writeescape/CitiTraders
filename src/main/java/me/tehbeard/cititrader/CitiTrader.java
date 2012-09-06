@@ -1,15 +1,17 @@
 package me.tehbeard.cititrader;
 
+import com.palmergames.bukkit.towny.Towny;
+import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
+import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.Town;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +34,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -48,6 +49,8 @@ public class CitiTrader extends JavaPlugin {
     public static CitiTrader self;
     public static Economy economy;
     public static boolean outdated = false;
+    public static Towny towny;
+    public static boolean isTowny;
     private static CitizensPlugin citizens;
     private static Attributes atts;
     private FileConfiguration profiles = null;
@@ -57,6 +60,8 @@ public class CitiTrader extends JavaPlugin {
     public void onEnable() {
         setupConfig();
         this.reloadProfiles();
+
+        setupTowny();
 
         if (setupEconomy()) {
             self = this;
@@ -226,6 +231,42 @@ public class CitiTrader extends JavaPlugin {
                     state.setAccName(an);
                 }
 
+
+                if (type.equals(WalletType.TOWN_BANK)) {
+                    if (CitiTrader.isTowny) {
+                        Hashtable<String, Resident> table = CitiTrader.towny.getTownyUniverse().getResidentMap();
+                        if (table.containsKey(sender.getName())) {
+                            Resident res = table.get(sender.getName());
+                            if (res.hasTown()) {
+                                Town town = null;
+                                try {
+                                    town = res.getTown();
+                                } catch (NotRegisteredException ex) {
+                                    Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                if (town != null) {
+                                    if (res.isMayor() || town.getAssistants().contains(res)) {
+                                        //sender.sendMessage(town.getEconomyName());
+                                        state.setAccName(town.getEconomyName());
+                                    } else {
+                                        sender.sendMessage(ChatColor.RED + "You are not the mayor or assistant of this town.");
+                                        return true;
+                                    }
+                                }
+                            } else {
+                                sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
+                                return true;
+                            }
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
+                            return true;
+                        }
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Towny is not enabled on this server.");
+                        return true;
+                    }
+                }
+
                 if (!type.hasPermission(sender)) {
                     sender.sendMessage(ChatColor.RED + "You don't have permission to use this wallet type!");
                 }
@@ -383,6 +424,18 @@ public class CitiTrader extends JavaPlugin {
         //JarInputStream jarStream = new JarInputStream(this.getResource("CitiTrader.class"));
         //Manifest mf = jarStream.getManifest();
         atts = mf.getMainAttributes();
+    }
+
+    public boolean setupTowny() {
+        try {
+            if (Bukkit.getPluginManager().getPlugin("Towny") != null) {
+                towny = (Towny) Bukkit.getPluginManager().getPlugin("Towny");
+                CitiTrader.isTowny = true;
+            }
+        } catch (Exception e) {
+            CitiTrader.isTowny = false;
+        }
+        return true;
     }
 
     public void setupConfig() {
