@@ -1,7 +1,6 @@
 package me.tehbeard.cititrader;
 
 import com.palmergames.bukkit.towny.Towny;
-import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import java.io.File;
@@ -50,7 +49,7 @@ public class CitiTrader extends JavaPlugin {
     public static Economy economy;
     public static boolean outdated = false;
     public static Towny towny;
-    public static boolean isTowny;
+    public static boolean isTowny = false;
     private static CitizensPlugin citizens;
     private static Attributes atts;
     private FileConfiguration profiles = null;
@@ -241,7 +240,7 @@ public class CitiTrader extends JavaPlugin {
                                 Town town = null;
                                 try {
                                     town = res.getTown();
-                                } catch (NotRegisteredException ex) {
+                                } catch (Exception ex) {
                                     Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                                 if (town != null) {
@@ -433,7 +432,7 @@ public class CitiTrader extends JavaPlugin {
                 CitiTrader.isTowny = true;
             }
         } catch (Exception e) {
-            CitiTrader.isTowny = false;
+            e.printStackTrace();
         }
         return true;
     }
