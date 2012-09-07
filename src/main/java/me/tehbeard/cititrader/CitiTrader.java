@@ -254,10 +254,12 @@ public class CitiTrader extends JavaPlugin {
                                 }
                             } else {
                                 sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
+                                sender.sendMessage(ChatColor.RED + "1");
                                 return true;
                             }
                         } else {
                             sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
+                            sender.sendMessage(ChatColor.RED + "2");
                             return true;
                         }
                     } else {
